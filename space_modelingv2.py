@@ -19,7 +19,14 @@ def euclideanDistance(x1,y1,x2,y2):
 def draw_arrow(x, y, angle): # angle in radians
     ''' '''
     r = 10  # or whatever fits you
-    plt.arrow(x, y, r*math.cos(angle), r*math.sin(angle),head_length=1,head_width=1, shape = 'full', color = 'green')
+    plt.arrow(x, y, r*math.cos(angle), r*math.sin(angle),head_length=1,head_width=1, shape = 'full', color = 'blue')
+
+def draw_person_top(x, y, angle, ax):
+    top_y = 62.5/2
+    top_x = 37.5/2
+    plot_ellipse(semimaj=top_x,semimin=top_y,phi=angle, x_cent=x, y_cent=y, ax = ax)
+
+
 
 class Space_Modeling:
 
@@ -89,24 +96,27 @@ class Space_Modeling:
         # Scaling factors for personal space
         A = 1
         Sx = d_mean
-        Sy = Sx/2
+        Sy = Sx/1.2
         # por um limite!!!!
         # compute personal space por each person
 
         f, ax = plt.subplots(1)
         idx = 1
+        plot_kwargs = {'color':'g','linestyle':'-','linewidth':1}
         for person in self.persons:
             draw_arrow(person[0],person[1], person[2]) #orientation arrow angle in radians
-            ax.plot(person[0],person[1],'ro', markersize = 8)
-            ax.text(person[0]+3,person[1]+3, "P" + str(idx), fontsize=12)
+            ax.plot(person[0],person[1],'bo', markersize = 8)
+            draw_person_top(person[0],person[1], person[2], ax)
+            ax.text(person[0]+3,person[1]+3, "$P_" + str(idx) + "$", fontsize=12)
 
 
-            plot_ellipse(semimaj=Sx,semimin=Sy,phi=person[2], x_cent=person[0], y_cent=person[1], ax = ax)
+            plot_ellipse(semimaj=Sx,semimin=Sy,phi=person[2], x_cent=person[0], y_cent=person[1], ax = ax, plot_kwargs=plot_kwargs)
 
             idx = idx + 1
         #group space plot
-        ax.plot(self.group_pose[0],self.group_pose[1],'gx', markersize = 8)
-        plot_ellipse(semimaj=group_radius,semimin=group_radius, x_cent=self.group_pose[0], y_cent=self.group_pose[1], ax = ax)
+        ax.plot(self.group_pose[0],self.group_pose[1],'rx', markersize = 8)
+        plot_kwargs = {'color':'r','linestyle':'--','linewidth':1}
+        plot_ellipse(semimaj=group_radius,semimin=group_radius, x_cent=self.group_pose[0], y_cent=self.group_pose[1], ax = ax, plot_kwargs=plot_kwargs)
 
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
@@ -114,9 +124,7 @@ class Space_Modeling:
 
         #plt.axis([-2, 8, -2, 8])
         plt.savefig('destination_path.eps', format='eps')
-
         plt.show()
-
 
 def main():
     if len(sys.argv)>1:
