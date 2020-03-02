@@ -1,4 +1,4 @@
-#Obtained from https://casper.ssl.berkeley.edu/astrobaki/index.php/Plotting_Ellipses_in_Python
+# Source: https://casper.ssl.berkeley.edu/astrobaki/index.php/Plotting_Ellipses_in_Python
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import chi2

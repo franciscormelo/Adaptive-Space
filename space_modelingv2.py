@@ -39,7 +39,6 @@ class Space_Modeling:
         file = list(filter(None, lines))
 
         for string in file:
-
             group = tuple(string.split(","))
             self.group_nb = len(group)
 
@@ -54,13 +53,10 @@ class Space_Modeling:
 
     def group_radius(self):
         ''' '''
-
         sum_radius = 0
         for i in range(len(self.persons)):
             #average of the distance between the group memebers and the center of the group, o-space radius
             sum_radius = sum_radius + euclideanDistance(self.persons[i][0],self.persons[i][1], self.group_pose[0], self.group_pose[1])
-
-
         return sum_radius / len(self.persons)
 
 
@@ -71,21 +67,17 @@ class Space_Modeling:
         #p_pose = ((1.5,2.,math.pi/6),(2.,2.5,-math.pi/2),(2.5,2.,5*math.pi/6),(2.,1.5,math.pi/2)) # 4 ciruclar arragement proximos
         #p_pose = ((2,2.,math.pi/2),(3.,2.,math.pi/2)) # vis a vis
 
-
         #compute group radius given the center of the o-space
         self.group_pose = (-157.0,-13.0)
         group_radius = self.group_radius()
 
 
-        ####################################################
         ### compute mean distance between group members
         d_sum = 0
         for i in range(len(self.persons)-1):
             #average of the distance between group members
             d_sum = d_sum +  euclideanDistance(self.persons[i][0],self.persons[i][1], self.persons[i+1][0],self.persons[i+1][1])
         d_mean = d_sum / len(self.persons)
-
-
 
         # https://www.visiondummy.com/2014/04/geometric-interpretation-covariance-matrix/
         # http://users.isr.ist.utl.pt/~mir/pub/probability.pdf
@@ -95,7 +87,7 @@ class Space_Modeling:
 
         # Scaling factors for personal space
         Sx = d_mean
-        Sy = Sx/1.2
+        Sy = Sx/1.5
         # por um limite!!!!
         # compute personal space por each person
 
