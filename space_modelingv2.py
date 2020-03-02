@@ -118,10 +118,6 @@ class Space_Modeling:
         plt.show()
 
 
-
-
-
-
 def main():
     if len(sys.argv)>1:
         with open(sys.argv[1]) as fh:
