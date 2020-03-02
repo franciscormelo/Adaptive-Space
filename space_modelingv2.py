@@ -22,10 +22,10 @@ def draw_arrow(x, y, angle): # angle in radians
     plt.arrow(x, y, r*math.cos(angle), r*math.sin(angle),head_length=1,head_width=1, shape = 'full', color = 'blue')
 
 def draw_person_top(x, y, angle, ax):
+    ''' '''
     top_y = 62.5/2
     top_x = 37.5/2
     plot_ellipse(semimaj=top_x,semimin=top_y,phi=angle, x_cent=x, y_cent=y, ax = ax)
-
 
 
 class Space_Modeling:
@@ -94,7 +94,6 @@ class Space_Modeling:
         ## variar a maneira como e calculado tendo em conta o tipo de grupo
 
         # Scaling factors for personal space
-        A = 1
         Sx = d_mean
         Sy = Sx/1.2
         # por um limite!!!!
@@ -122,14 +121,12 @@ class Space_Modeling:
         plt.ylabel('y [cm]')
 
 
-        #plt.axis([-2, 8, -2, 8])
         plt.savefig('destination_path.eps', format='eps')
         plt.show()
 
 def main():
     if len(sys.argv)>1:
         with open(sys.argv[1]) as fh:
-
             app = Space_Modeling(fh)
             app.solve()
 
