@@ -49,6 +49,10 @@ class Space_Modeling:
                 self.persons.append(tuple([float(pose[0][1:]),float(pose[1]), float(pose[2][:-1])]))
 
             self.persons = tuple(self.persons)
+            self.group_pose = (-157.0,-13.0) #o space center point
+
+            #compute group radius given the center of the o-space
+            self.group_radius = self.group_radius()
 
 
     def group_radius(self):
@@ -60,6 +64,10 @@ class Space_Modeling:
         return sum_radius / len(self.persons)
 
 
+    def approaching_pose(self):
+        ''' '''
+        pass
+
     def solve(self):
         ''' '''
         # (pos_x, pos_y, angles)
@@ -67,9 +75,8 @@ class Space_Modeling:
         #p_pose = ((1.5,2.,math.pi/6),(2.,2.5,-math.pi/2),(2.5,2.,5*math.pi/6),(2.,1.5,math.pi/2)) # 4 ciruclar arragement proximos
         #p_pose = ((2,2.,math.pi/2),(3.,2.,math.pi/2)) # vis a vis
 
-        #compute group radius given the center of the o-space
-        self.group_pose = (-157.0,-13.0)
-        group_radius = self.group_radius()
+
+        group_radius = self.group_radius
 
 
         ### compute mean distance between group members
@@ -78,9 +85,6 @@ class Space_Modeling:
             #average of the distance between group members
             d_sum = d_sum +  euclideanDistance(self.persons[i][0],self.persons[i][1], self.persons[i+1][0],self.persons[i+1][1])
         d_mean = d_sum / len(self.persons)
-
-        # https://www.visiondummy.com/2014/04/geometric-interpretation-covariance-matrix/
-        # http://users.isr.ist.utl.pt/~mir/pub/probability.pdf
 
 
         ## variar a maneira como e calculado tendo em conta o tipo de grupo
@@ -93,7 +97,7 @@ class Space_Modeling:
 
         f, ax = plt.subplots(1)
         idx = 1
-        plot_kwargs = {'color':'g','linestyle':'-','linewidth':1}
+        plot_kwargs = {'color':'g','linestyle':'-','linewidth':0.8}
         for person in self.persons:
             draw_arrow(person[0],person[1], person[2]) #orientation arrow angle in radians
             ax.plot(person[0],person[1],'bo', markersize = 8)
@@ -104,11 +108,17 @@ class Space_Modeling:
             plot_ellipse(semimaj=Sx,semimin=Sy,phi=person[2], x_cent=person[0], y_cent=person[1], ax = ax, plot_kwargs=plot_kwargs)
 
             idx = idx + 1
-        #group space plot
+        #O Space
         ax.plot(self.group_pose[0],self.group_pose[1],'rx', markersize = 8)
-        plot_kwargs = {'color':'r','linestyle':'--','linewidth':1}
-        plot_ellipse(semimaj=group_radius,semimin=group_radius, x_cent=self.group_pose[0], y_cent=self.group_pose[1], ax = ax, plot_kwargs=plot_kwargs)
+        plot_kwargs = {'color':'r','linestyle':'-','linewidth':1}
+        plot_ellipse(semimaj=group_radius - 20,semimin=group_radius -20, x_cent=self.group_pose[0], y_cent=self.group_pose[1], ax = ax, plot_kwargs=plot_kwargs)
 
+        #p Space
+        plot_ellipse(semimaj=group_radius + 20,semimin=group_radius + 20, x_cent=self.group_pose[0], y_cent=self.group_pose[1], ax = ax, plot_kwargs=plot_kwargs)
+
+        # approaching circle area
+        plot_kwargs = {'color':'c','linestyle':':','linewidth':2}
+        plot_ellipse(semimaj=group_radius ,semimin=group_radius , x_cent=self.group_pose[0], y_cent=self.group_pose[1], ax = ax, plot_kwargs=plot_kwargs)
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
 
