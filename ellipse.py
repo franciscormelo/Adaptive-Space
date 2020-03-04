@@ -79,12 +79,12 @@ def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3,
     x = r * np.cos(theta)
     y = r * np.sin(theta)
     data = np.array([x, y])
-    S = np.array([[semimaj, 0], [0, semimin]])
-    R = np.array([[np.cos(phi), -np.sin(phi)], [np.sin(phi), np.cos(phi)]])
-    T = np.dot(R, S)
-    data = np.dot(T, data)
-    data[0] += x_cent
-    data[1] += y_cent
+    S = np.array([[semimaj, 0], [0, semimin]]) # Scaling Matrix
+    R = np.array([[np.cos(phi), -np.sin(phi)], [np.sin(phi), np.cos(phi)]]) # Rotation Matrix
+    T = np.dot(R, S) # Transformation Matrix
+    data = np.dot(T, data) # Transformation of data
+    data[0] += x_cent # Translation in x
+    data[1] += y_cent # Translation in y
 
     # Output data?
     if data_out == True:
