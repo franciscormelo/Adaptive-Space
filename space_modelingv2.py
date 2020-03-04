@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
-"""Version ellipse function"""
+"""Version ellipse function
+    default unit is cm
+"""
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import patches
@@ -10,7 +12,7 @@ import statistics
 import sys
 
 # CONSTANTS
-# Human Body Dimensions top view
+# Human Body Dimensions top view in cm
 HUMAN_Y = 62.5
 HUMAN_X = 37.5
 
@@ -32,6 +34,28 @@ def draw_person_top(x, y, angle, ax):
     top_x = HUMAN_X / 2
     plot_ellipse(semimaj=top_x, semimin=top_y, phi=angle, x_cent=x, y_cent=y, ax=ax)
 
+def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
+    """ """
+    draw_arrow(x, y, angle)  # orientation arrow angle in radians
+    ax.plot(x, y, 'bo', markersize=8)
+    draw_person_top(x, y, angle, ax)
+    ax.text(x + 3, y + 3, "$P_" + str(idx) + "$", fontsize=12)
+
+    plot_ellipse(semimaj=sx, semimin=sy, phi=angle, x_cent=x, y_cent=y, ax=ax,
+                 plot_kwargs=plot_kwargs)
+
+    return patches.Ellipse((x,y),sx*2,sy*2,math.degrees(angle)) # Multiply sx and sy by 2 to get the diameter
+
+def approachingfiltering(personal_space, approaching_filter, idx):
+    # Approaching Area filtering - remove points tha are inside the personal space of a person
+    if idx == 1:
+        approaching_filter = [(x,y) for x,y in zip(approaching_filter[0], approaching_filter[1]) if not personal_space.contains_point([x,y])]
+    else:
+        cx = [j[0] for j in approaching_filter]
+        cy = [k[1] for k in approaching_filter]
+        approaching_filter = [(x,y) for x,y in zip(cx, cy) if not personal_space.contains_point([x,y])]
+    return approaching_filter
+
 
 class SpaceModeling:
 
@@ -45,7 +69,7 @@ class SpaceModeling:
 
         for string in file:
             group = tuple(string.split(","))
-            self.group_nb = len(group)
+            self.group_nb = len(group) # Numbers of members in a group
 
             self.persons = []
             for person in group:
@@ -66,9 +90,6 @@ class SpaceModeling:
             sum_radius = sum_radius + euclidean_distance(self.persons[i][0], self.persons[i][1], self.group_pose[0], self.group_pose[1])
         return sum_radius / len(self.persons)
 
-    def approaching_pose(self):
-        """ """
-        pass
 
     def solve(self):
         """ """
@@ -78,23 +99,22 @@ class SpaceModeling:
         # p_pose = ((2,2.,math.pi/2),(3.,2.,math.pi/2)) # vis a vis
 
         f, ax = plt.subplots(1)
-        group_radius = self.group_radius
 
         # O Space Modeling
         ax.plot(self.group_pose[0], self.group_pose[1], 'rx', markersize=8)
         plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
-        plot_ellipse(semimaj=group_radius - HUMAN_X/2, semimin=group_radius - HUMAN_X/2, x_cent=self.group_pose[0],
+        plot_ellipse(semimaj=self.group_radius - HUMAN_X/2, semimin=self.group_radius - HUMAN_X/2, x_cent=self.group_pose[0],
                      y_cent=self.group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
         # p Space Modeling
-        plot_ellipse(semimaj=group_radius + HUMAN_X/2, semimin=group_radius + HUMAN_X/2, x_cent=self.group_pose[0],
+        plot_ellipse(semimaj=self.group_radius + HUMAN_X/2, semimin=self.group_radius + HUMAN_X/2, x_cent=self.group_pose[0],
                      y_cent=self.group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
         # approaching circle area
         plot_kwargs = {'color': 'c', 'linestyle': ':', 'linewidth': 2}
-        plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=self.group_pose[0],
+        plot_ellipse(semimaj=self.group_radius, semimin=self.group_radius, x_cent=self.group_pose[0],
                             y_cent=self.group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
-        approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=self.group_pose[0],
+        approaching_area = plot_ellipse(semimaj=self.group_radius, semimin=self.group_radius, x_cent=self.group_pose[0],
                             y_cent=self.group_pose[1],data_out = True)
 
         # compute mean distance between group members
@@ -104,7 +124,7 @@ class SpaceModeling:
             d_sum = d_sum + euclidean_distance(self.persons[i][0], self.persons[i][1], self.persons[i + 1][0],
                                               self.persons[i + 1][1])
         d_mean = d_sum / len(self.persons)
-
+###############################################################################
         # variar a maneira como e calculado tendo em conta o tipo de grupo
 
         # Scaling factors for personal space
@@ -113,49 +133,30 @@ class SpaceModeling:
         # por um limite!!!!
         # compute personal space por each person
 
-
+###############################################################################
         idx = 1
         plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
 
         approaching_filter = approaching_area
+
         for person in self.persons:
-            draw_arrow(person[0], person[1], person[2])  # orientation arrow angle in radians
-            ax.plot(person[0], person[1], 'bo', markersize=8)
-            draw_person_top(person[0], person[1], person[2], ax)
-            ax.text(person[0] + 3, person[1] + 3, "$P_" + str(idx) + "$", fontsize=12)
 
-            plot_ellipse(semimaj=sx, semimin=sy, phi=person[2], x_cent=person[0], y_cent=person[1], ax=ax,
-                         plot_kwargs=plot_kwargs)
-
-            personal_space = patches.Ellipse((person[0],person[1]),sx*2,sy*2,math.degrees(person[2])) # Multiply sx and sy by 2 to get the diameter
+            personal_space = draw_personalspace(person[0], person[1], person[2], ax, sx, sy, plot_kwargs, idx)
 
             # Approaching Area filtering - remove points tha are inside the personal space of a person
-            if idx == 1:
-                approaching_filter = [(x,y) for x,y in zip(approaching_area[0], approaching_area[1]) if not personal_space.contains_point([x,y])]
-            else:
-                cx = []
-                cy = []
-                cx = [j[0] for j in approaching_filter]
-                cy = [k[1] for k in approaching_filter]
-                approaching_filter = []
-                approaching_filter = [(x,y) for x,y in zip(cx, cy) if not personal_space.contains_point([x,y])]
+            approaching_filter = approachingfiltering(personal_space, approaching_filter, idx)
             idx = idx + 1
 
+        # possible approaching positions
+        approaching_x = [j[0] for j in approaching_filter]
+        approaching_y = [k[1] for k in approaching_filter]
 
 
-        cx = [j[0] for j in approaching_filter]
-        cy = [k[1] for k in approaching_filter]
-
-
-        ax.plot(cx, cy)
+        ax.plot(approaching_x, approaching_y, 'c.',  markersize = 5)
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         plt.savefig('destination_path.eps', format='eps')
         plt.show()
-
-
-
-
 
 
 def main():
