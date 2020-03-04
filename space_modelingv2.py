@@ -11,6 +11,7 @@ from ellipse import *
 import statistics
 import sys
 
+SHOW_PLOT = True
 # CONSTANTS
 # Human Body Dimensions top view in cm
 HUMAN_Y = 62.5
@@ -77,7 +78,7 @@ class SpaceModeling:
                 self.persons.append(tuple([float(pose[0][1:]), float(pose[1]), float(pose[2][:-1])]))
 
             self.persons = tuple(self.persons)
-            self.group_pose = (-157.0, -13.0)  # o space center point
+            self.group_pose = (0, 0)  # o space center point
 
             # compute group radius given the center of the o-space
             self.group_radius = self.group_radius()
@@ -125,11 +126,28 @@ class SpaceModeling:
                                               self.persons[i + 1][1])
         d_mean = d_sum / len(self.persons)
 ###############################################################################
+        if self.group_nb == 2:
+
+            #tentar fazer de maneira automatica mas por enquanto fazer por tipo de grupo
+            if self.persons[0][2] == self.persons[1][2]: # side-by-side
+
+
+                sy = euclidean_distance(self.persons[0][0], self.persons[0][1], self.persons[1][0],
+                                                  self.persons[1][1])/2
+                sx = sy*2
+
+            elif abs(round(self.persons[0][2] + math.pi,2))  == abs(round(self.persons[1][2],2)): # vis-a-vis
+                print("hello")
+                sx = euclidean_distance(self.persons[0][0], self.persons[0][1], self.persons[1][0],
+                                                  self.persons[1][1])/2
+                sy = sx/2
         # variar a maneira como e calculado tendo em conta o tipo de grupo
+        else: # The typical arragement  of a group of more than 2 persons is tipically circular
+
 
         # Scaling factors for personal space
-        sx = d_mean # radius in x
-        sy = sx / 1.5 # radius in y
+            sx = d_mean # radius in x
+            sy = sx / 1.5 # radius in y
         # por um limite!!!!
         # compute personal space por each person
 
@@ -156,7 +174,9 @@ class SpaceModeling:
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         plt.savefig('destination_path.eps', format='eps')
-        plt.show()
+
+        if SHOW_PLOT == True:
+            plt.show()
 
 
 def main():
