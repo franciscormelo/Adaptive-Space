@@ -158,21 +158,25 @@ class SpaceModeling:
                     sx = d_mean # radius in x
                     sy = sx / 1.5 # radius in y
 
-                if sx > PSPACEX or sy > PSPACEY:
-                    sx = PSPACEX
-                    sy = PSPACEY
+                    if sx > PSPACEX or sy > PSPACEY:
+                        sx = PSPACEX
+                        sy = PSPACEY
 
         # variar a maneira como e calculado tendo em conta o tipo de grupo
         else: # The typical arragement  of a group of more than 2 persons is tipically circular
 
-
         # Scaling factors for personal space
             sx = d_mean # radius in x
             sy = sx / 1.5 # radius in y
+            if sy < HUMAN_Y/2: #the personal space should be at least the size of the individual
+                sy = HUMAN_Y/2
 
         if sx > PSPACEX or sy > PSPACEY:
+            print(entrei)
             sx = PSPACEX
             sy = PSPACEY
+
+
 
 
 ###############################################################################
