@@ -17,6 +17,10 @@ SHOW_PLOT = True
 HUMAN_Y = 62.5
 HUMAN_X = 37.5
 
+# Personal Space Maximum 45 - 120 cm
+PSPACEX = 80.0
+PSPACEY = 60.0
+
 def euclidean_distance(x1, y1, x2, y2):
     """ """
     dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -94,11 +98,6 @@ class SpaceModeling:
 
     def solve(self):
         """ """
-        # (pos_x, pos_y, angles)
-        # p_pose = ((1.,2.,math.pi/6),(2.,3.,-math.pi/2),(3.,2.,5*math.pi/6),(2.,1.,math.pi/2)) # 4 ciruclar arragement proximos
-        # p_pose = ((1.5,2.,math.pi/6),(2.,2.5,-math.pi/2),(2.5,2.,5*math.pi/6),(2.,1.5,math.pi/2)) # 4 ciruclar arragement proximos
-        # p_pose = ((2,2.,math.pi/2),(3.,2.,math.pi/2)) # vis a vis
-
         f, ax = plt.subplots(1)
 
         # O Space Modeling
@@ -134,13 +133,35 @@ class SpaceModeling:
 
                 sy = euclidean_distance(self.persons[0][0], self.persons[0][1], self.persons[1][0],
                                                   self.persons[1][1])/2
-                sx = sy*2
+                sx = sy * 1.5
+
+
+                if sy > PSPACEY: # if the persons are too far away from each other the personal space should be limited
+                    sx = PSPACEX
+                    sy = PSPACEY
+                sx = PSPACEX
+                sy = PSPACEY
 
             elif abs(round(self.persons[0][2] + math.pi,2))  == abs(round(self.persons[1][2],2)): # vis-a-vis
-                print("hello")
+
                 sx = euclidean_distance(self.persons[0][0], self.persons[0][1], self.persons[1][0],
                                                   self.persons[1][1])/2
-                sy = sx/2
+                sy = sx/1.5
+
+                if sy < HUMAN_Y/2: #the personal space should be at least the size of the individual
+                    sy = HUMAN_Y/2
+
+                if sx > PSPACEX : # if the persons are too far away from each other the personal space should be limited
+                    sx = PSPACEX
+                    sy = PSPACEY
+            else:
+                    sx = d_mean # radius in x
+                    sy = sx / 1.5 # radius in y
+
+                if sx > PSPACEX or sy > PSPACEY:
+                    sx = PSPACEX
+                    sy = PSPACEY
+
         # variar a maneira como e calculado tendo em conta o tipo de grupo
         else: # The typical arragement  of a group of more than 2 persons is tipically circular
 
@@ -148,8 +169,11 @@ class SpaceModeling:
         # Scaling factors for personal space
             sx = d_mean # radius in x
             sy = sx / 1.5 # radius in y
-        # por um limite!!!!
-        # compute personal space por each person
+
+        if sx > PSPACEX or sy > PSPACEY:
+            sx = PSPACEX
+            sy = PSPACEY
+
 
 ###############################################################################
         idx = 1
