@@ -92,7 +92,6 @@ class SpaceModeling:
         self.group_pose = []
         self.group_radius = []
         for num, string in enumerate(file):
-            print(num)
             data = string.split("--")
             group = tuple(data[0].split(","))
             self.group_nb.append(len(group)) # Numbers of members in a group
@@ -169,8 +168,6 @@ class SpaceModeling:
                     if sy > PSPACEY: # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
-                    sx = PSPACEX
-                    sy = PSPACEY
 
                 elif abs(round(persons[0][2] + math.pi,2))  == abs(round(persons[1][2],2)): # vis-a-vis
 
@@ -184,7 +181,7 @@ class SpaceModeling:
                     if sx > PSPACEX : # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
-                else:
+                else: # Other 2 persons group configurations
                         sx = d_mean # radius in x
                         sy = sx / 1.5 # radius in y
 
@@ -201,8 +198,7 @@ class SpaceModeling:
                 if sy < HUMAN_Y/2: #the personal space should be at least the size of the individual
                     sy = HUMAN_Y/2
 
-            if sx > PSPACEX or sy > PSPACEY:
-
+            if sx > PSPACEX or sy > PSPACEY: # if the persons are too far away from each other the personal space should be limited
                 sx = PSPACEX
                 sy = PSPACEY
 
