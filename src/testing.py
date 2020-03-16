@@ -21,21 +21,40 @@ circle = patches.Circle((1,1), radius =  1, fill = False)
 
 cx = [1 ,2, 3]
 cy = [1 ,2 ,3]
-ellipse = patches.Ellipse((0,0),1,1,180)
+sx = 1
+sy = 2
+x0 = 0
+y0 = 0
+alpha = 45
+ellipse = patches.Ellipse((x0,y0),sx*2,sy*2,alpha, fill = False)
 points = [(x,y) for x,y in zip(cx, cy) if circle.contains_point([x,y])]
 
 new = [i[0] for i in points]
-print(points)
-print(new)
+# print(points)
+# print(new)
 
-ax.add_patch(arc1)
-ax.add_patch(arc2)
-ax.add_patch(circle)
+#ax.add_patch(arc1)
+#ax.add_patch(arc2)
+#ax.add_patch(circle)
+ax.add_patch(ellipse)
+
+alpha = math.radians(alpha)
+angle = math.pi
+xprime = sx * math.cos(angle) + x0
+yprime = sy * math.sin(angle) + y0
+
+#
+x = math.cos(alpha) * xprime - math.sin(alpha) * yprime
+y = math.sin(alpha) * xprime + math.cos(alpha) * yprime
+plt.plot(x, y, 'bo', markersize=8)
 
 
 #plt.plot(data[0], data[1],)
 ax.set(xlim=(-2, 2), ylim=(-2, 2))
-plt.show()
+plt.show(block=False)
+print("==================================================")
+input("Hit Enter To Close... ")
+plt.close()
 
 
 

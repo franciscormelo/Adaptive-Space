@@ -3,7 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import chi2
 
-def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3, ax=None, plot_kwargs=None, \
+
+def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3, ax=None, plot_kwargs=None,
                  fill=False, fill_kwargs=None, data_out=False, cov=None, mass_level=0.68):
     '''
         An easy to use function for plotting ellipses in Python 2.7!
@@ -79,12 +80,13 @@ def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3,
     x = r * np.cos(theta)
     y = r * np.sin(theta)
     data = np.array([x, y])
-    S = np.array([[semimaj, 0], [0, semimin]]) # Scaling Matrix
-    R = np.array([[np.cos(phi), -np.sin(phi)], [np.sin(phi), np.cos(phi)]]) # Rotation Matrix
-    T = np.dot(R, S) # Transformation Matrix
-    data = np.dot(T, data) # Transformation of data
-    data[0] += x_cent # Translation in x
-    data[1] += y_cent # Translation in y
+    S = np.array([[semimaj, 0], [0, semimin]])  # Scaling Matrix
+    # Rotation Matrix
+    R = np.array([[np.cos(phi), -np.sin(phi)], [np.sin(phi), np.cos(phi)]])
+    T = np.dot(R, S)  # Transformation Matrix
+    data = np.dot(T, data)  # Transformation of data
+    data[0] += x_cent  # Translation in x
+    data[1] += y_cent  # Translation in y
 
     # Output data?
     if data_out == True:

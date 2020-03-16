@@ -228,6 +228,11 @@ class SpaceModeling:
 
             ax.plot(approaching_x, approaching_y, 'c.',  markersize=5)
 
+            x = [item[0] for item in persons]
+            y = [item[1] for item in persons]
+            # ax.plot([persons[0][0],persons[1][0]],[persons[0][1],persons[1][1]])
+            ax.plot(x, y, 'g')
+
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         plt.savefig('destination_path.eps', format='eps')
