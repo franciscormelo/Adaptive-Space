@@ -16,6 +16,7 @@ def create_ellipse(center, lengths, angle=0):
     return ellr
 
 
+el_nb = 4
 fig, ax = plt.subplots()
 
 # these next few lines are pretty important because
@@ -37,14 +38,28 @@ verts2 = np.array(ellipse2.exterior.coords.xy)
 patch2 = Polygon(verts2.T, color='red', alpha=0.5)
 ax.add_patch(patch2)
 
+# first ellipse in blue
+ellipse5 = create_ellipse((7.5, 4), (2, 4), 90)
+verts5 = np.array(ellipse5.exterior.coords.xy)
+patch5 = Polygon(verts5.T, color='blue', alpha=0.5)
+ax.add_patch(patch5)
+
+# second ellipse in red
+ellipse4 = create_ellipse((4, 0), (2, 4), 0)
+verts4 = np.array(ellipse4.exterior.coords.xy)
+patch4 = Polygon(verts4.T, color='red', alpha=0.5)
+ax.add_patch(patch4)
+
 # the intersect will be outlined in black
 intersect = ellipse1.intersection(ellipse2)
 verts3 = np.array(intersect.exterior.coords.xy)
 patch3 = Polygon(verts3.T, facecolor='none', edgecolor='black')
 ax.add_patch(patch3)
+
+
 print(np.amin(verts3[0]))
 print(np.amax(verts3[0]))
-diff = np.amax(verts3[0]) - np.amin(verts3[0])
+diff = abs(np.amax(verts3[0]) - np.amin(verts3[0]))
 print(diff)
 # compute areas and ratios
 print('area of ellipse 1:', ellipse1.area)
@@ -54,10 +69,29 @@ print('intersect/ellipse1:', intersect.area / ellipse1.area)
 print('intersect/ellipse2:', intersect.area / ellipse2.area)
 
 
-ellipse3 = create_ellipse((0, 4), (2, 4 - diff), 90)
+ellipse3 = create_ellipse((0, 4), (2, 4 - diff/2), 90)
 verts3 = np.array(ellipse3.exterior.coords.xy)
 patch3 = Polygon(verts3.T, color='blue', alpha=0.5)
 ax.add_patch(patch3)
+
+ellipse7 = create_ellipse((4, 7), (2, 4 - diff/2), 0)
+verts7 = np.array(ellipse7.exterior.coords.xy)
+patch7 = Polygon(verts7.T, color='blue', alpha=0.5)
+ax.add_patch(patch7)
+
+
+# first ellipse in blue
+ellipse10 = create_ellipse((7.5, 4), (2, 4-diff/2), 90)
+verts10 = np.array(ellipse10.exterior.coords.xy)
+patch10 = Polygon(verts10.T, color='blue', alpha=0.5)
+ax.add_patch(patch10)
+
+# second ellipse in red
+ellipse11 = create_ellipse((4, 0), (2, 4-diff/2), 0)
+verts11 = np.array(ellipse11.exterior.coords.xy)
+patch11 = Polygon(verts11.T, color='red', alpha=0.5)
+ax.add_patch(patch11)
+
 
 
 plt.show(block=False)
