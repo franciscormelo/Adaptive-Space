@@ -54,14 +54,13 @@ while round(intersect.area) != 0:
         sy = sy - diff
 
         # first ellipse in blue
-        ellipse1 = create_ellipse((0, 4), (sx , sy), 90)
+        ellipse1 = create_ellipse((0, 4), (sx, sy), 90)
 
         # second ellipse in red
         ellipse2 = create_ellipse((4, 7), (sx, sy), 0)
 
         intersect = ellipse1.intersection(ellipse2)
         print('area of intersect:', intersect.area)
-
 
 
 # first ellipse in blue
@@ -73,9 +72,6 @@ ax.add_patch(patch4)
 verts5 = np.array(ellipse2.exterior.coords.xy)
 patch5 = Polygon(verts5.T, color='red', alpha=0.5)
 ax.add_patch(patch5)
-
-
-
 
 
 plt.show(block=False)

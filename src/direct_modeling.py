@@ -2,7 +2,9 @@ from matplotlib import pyplot as plt
 from shapely.geometry.point import Point
 from shapely import affinity
 from matplotlib.patches import Polygon
+from matplotlib import patches
 import numpy as np
+
 
 
 def create_ellipse(center, lengths, angle=0):
@@ -14,6 +16,7 @@ def create_ellipse(center, lengths, angle=0):
     ell = affinity.scale(circ, int(lengths[0]), int(lengths[1]))
     ellr = affinity.rotate(ell, angle)
     return ellr
+
 
 
 el_nb = 4
@@ -61,12 +64,19 @@ print(np.amin(verts3[0]))
 print(np.amax(verts3[0]))
 diff = abs(np.amax(verts3[0]) - np.amin(verts3[0]))
 print(diff)
+
+diff_y = abs(np.amax(verts3[1]) - np.amin(verts3[1]))
+print("Difference in y " + str(diff_y))
 # compute areas and ratios
 print('area of ellipse 1:', ellipse1.area)
 print('area of ellipse 2:', ellipse2.area)
 print('area of intersect:', intersect.area)
 print('intersect/ellipse1:', intersect.area / ellipse1.area)
 print('intersect/ellipse2:', intersect.area / ellipse2.area)
+
+p = patches.Rectangle((np.amin(verts3[0]), np.amin(verts3[1])), diff, diff_y,fill=False)
+
+ax.add_patch(p)
 
 
 ellipse3 = create_ellipse((0, 4), (2, 4 - diff/2), 90)
