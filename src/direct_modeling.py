@@ -4,6 +4,7 @@ from shapely import affinity
 from matplotlib.patches import Polygon
 from matplotlib import patches
 import numpy as np
+import math
 
 
 
@@ -32,26 +33,26 @@ ax.set_aspect('equal')
 # first ellipse in blue
 ellipse1 = create_ellipse((0, 4), (2, 4), 90)
 verts1 = np.array(ellipse1.exterior.coords.xy)
-patch1 = Polygon(verts1.T, color='blue', alpha=0.5)
+patch1 = Polygon(verts1.T, color='blue', alpha=0.5, fill = False)
 ax.add_patch(patch1)
 
 # second ellipse in red
 ellipse2 = create_ellipse((4, 7), (2, 4), 0)
 verts2 = np.array(ellipse2.exterior.coords.xy)
-patch2 = Polygon(verts2.T, color='red', alpha=0.5)
+patch2 = Polygon(verts2.T, color='red', alpha=0.5, fill = False)
 ax.add_patch(patch2)
 
-# first ellipse in blue
-ellipse5 = create_ellipse((7.5, 4), (2, 4), 90)
-verts5 = np.array(ellipse5.exterior.coords.xy)
-patch5 = Polygon(verts5.T, color='blue', alpha=0.5)
-ax.add_patch(patch5)
-
-# second ellipse in red
-ellipse4 = create_ellipse((4, 0), (2, 4), 0)
-verts4 = np.array(ellipse4.exterior.coords.xy)
-patch4 = Polygon(verts4.T, color='red', alpha=0.5)
-ax.add_patch(patch4)
+# # first ellipse in blue
+# ellipse5 = create_ellipse((7.5, 4), (2, 4), 90)
+# verts5 = np.array(ellipse5.exterior.coords.xy)
+# patch5 = Polygon(verts5.T, color='blue', alpha=0.5)
+# ax.add_patch(patch5)
+#
+# # second ellipse in red
+# ellipse4 = create_ellipse((4, 0), (2, 4), 0)
+# verts4 = np.array(ellipse4.exterior.coords.xy)
+# patch4 = Polygon(verts4.T, color='red', alpha=0.5)
+# ax.add_patch(patch4)
 
 # the intersect will be outlined in black
 intersect = ellipse1.intersection(ellipse2)
@@ -74,33 +75,44 @@ print('area of intersect:', intersect.area)
 print('intersect/ellipse1:', intersect.area / ellipse1.area)
 print('intersect/ellipse2:', intersect.area / ellipse2.area)
 
+area1 = ellipse1.area- intersect.area
+area2 = ellipse2.area - intersect.area
+
+a1 = area1 / (math.pi * 2)
+a2 = area2 / (math.pi * 2)
+
+print(a1)
+print(a2)
+
+print("##A " + str(4-(diff/2)))
+
 p = patches.Rectangle((np.amin(verts3[0]), np.amin(verts3[1])), diff, diff_y,fill=False)
 
 ax.add_patch(p)
 
 
-ellipse3 = create_ellipse((0, 4), (2, 4 - diff/2), 90)
+ellipse3 = create_ellipse((0, 4), (2, a1),90)
 verts3 = np.array(ellipse3.exterior.coords.xy)
 patch3 = Polygon(verts3.T, color='blue', alpha=0.5)
 ax.add_patch(patch3)
 
-ellipse7 = create_ellipse((4, 7), (2, 4 - diff/2), 0)
+ellipse7 = create_ellipse((4, 7), (2, a2), 0)
 verts7 = np.array(ellipse7.exterior.coords.xy)
 patch7 = Polygon(verts7.T, color='blue', alpha=0.5)
 ax.add_patch(patch7)
 
 
-# first ellipse in blue
-ellipse10 = create_ellipse((7.5, 4), (2, 4-diff/2), 90)
-verts10 = np.array(ellipse10.exterior.coords.xy)
-patch10 = Polygon(verts10.T, color='blue', alpha=0.5)
-ax.add_patch(patch10)
-
-# second ellipse in red
-ellipse11 = create_ellipse((4, 0), (2, 4-diff/2), 0)
-verts11 = np.array(ellipse11.exterior.coords.xy)
-patch11 = Polygon(verts11.T, color='red', alpha=0.5)
-ax.add_patch(patch11)
+# # first ellipse in blue
+# ellipse10 = create_ellipse((7.5, 4), (2, 4-diff/2), 90)
+# verts10 = np.array(ellipse10.exterior.coords.xy)
+# patch10 = Polygon(verts10.T, color='blue', alpha=0.5)
+# ax.add_patch(patch10)
+#
+# # second ellipse in red
+# ellipse11 = create_ellipse((4, 0), (2, 4-diff/2), 0)
+# verts11 = np.array(ellipse11.exterior.coords.xy)
+# patch11 = Polygon(verts11.T, color='red', alpha=0.5)
+# ax.add_patch(patch11)
 
 
 

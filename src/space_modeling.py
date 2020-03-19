@@ -81,6 +81,22 @@ def group_radius(persons, group_pose):
                 persons[i][0], persons[i][1], group_pose[0], group_pose[1])
     return sum_radius / len(persons)
 
+def ellipse_intersection(ellipse1, ellipse2):
+
+    return ellipse1.intersection(ellipse2)
+
+
+
+def create_ellipse(center, lengths, angle=0):
+    """
+    create a shapely ellipse. adapted from
+    https://gis.stackexchange.com/a/243462
+    """
+    circ = Point(center).buffer(1)
+    ell = affinity.scale(circ, int(lengths[0]), int(lengths[1]))
+    ellr = affinity.rotate(ell, angle)
+    return ellr
+
 
 class SpaceModeling:
 
