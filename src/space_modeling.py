@@ -137,7 +137,7 @@ def parameters_computation(persons):
         # a1 = math.sqrt( (area1*1.2) / math.pi)
         # a2 = math.sqrt( (area2*1.2) / math.pi)
         #b = a1/1.2
-        sy = sx1 / 1.5
+        sy = sx1 / PFACTOR
 
         return (sx1, sy)
 
@@ -229,7 +229,7 @@ class SpaceModeling:
                     #sy = parameters_computation(persons)
                     sy = euclidean_distance(persons[0][0], persons[0][1], persons[1][0],
                                             persons[1][1]) / 2
-                    sx = sy * 1.5
+                    sx = sy * PFACTOR
 
                     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
                         sy = HUMAN_Y / 2
@@ -246,7 +246,7 @@ class SpaceModeling:
 
                     sx = euclidean_distance(persons[0][0], persons[0][1], persons[1][0],
                                             persons[1][1]) / 2
-                    sy = sx / 1.5
+                    sy = sx / PFACTOR
 
                     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
                         sy = HUMAN_Y / 2
@@ -272,7 +272,7 @@ class SpaceModeling:
 
                 # Scaling factors for personal space
                 sx = d_mean  # radius in x
-                sy = sx / 1.5  # radius in y
+                sy = sx / PFACTOR  # radius in y
                 if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
                     sy = HUMAN_Y / 2
 
