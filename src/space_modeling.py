@@ -25,8 +25,8 @@ HUMAN_X = 37.5
 PSPACEX = 80.0
 PSPACEY = 60.0
 
-#Porpotinal factor between pspace size in x and y axis
-PFACTOR = PSPACEX/PSPACEY
+# Porpotinal factor between pspace size in x and y axis
+PFACTOR = PSPACEX / PSPACEY
 
 
 def euclidean_distance(x1, y1, x2, y2):
@@ -87,10 +87,10 @@ def group_radius(persons, group_pose):
                 persons[i][0], persons[i][1], group_pose[0], group_pose[1])
     return sum_radius / len(persons)
 
+
 def ellipse_intersection(ellipse1, ellipse2):
 
     return ellipse1.intersection(ellipse2)
-
 
 
 def create_shapely_ellipse(center, lengths, angle=0):
@@ -103,21 +103,23 @@ def create_shapely_ellipse(center, lengths, angle=0):
     ellr = affinity.rotate(ell, angle)
     return ellr
 
+
 def parameters_computation(persons):
     # first ellipse in blue
-    ellipse1 = create_shapely_ellipse((persons[0][0],persons[0][1]), (PSPACEY, PSPACEX), persons[0][2])
+    ellipse1 = create_shapely_ellipse(
+        (persons[0][0], persons[0][1]), (PSPACEY, PSPACEX), persons[0][2])
     verts1 = np.array(ellipse1.exterior.coords.xy)
 
     # second ellipse in red
-    ellipse2 = create_shapely_ellipse((persons[1][0],persons[1][1]), (PSPACEY, PSPACEX),  persons[1][2])
+    ellipse2 = create_shapely_ellipse(
+        (persons[1][0], persons[1][1]), (PSPACEY, PSPACEX),  persons[1][2])
     verts2 = np.array(ellipse2.exterior.coords.xy)
-
 
     intersect = ellipse1.intersection(ellipse2)
 
     # No intersection --> Default personal space
     if intersect.is_empty:
-        return (PSPACEX,PSPACEY)
+        return (PSPACEX, PSPACEY)
 
     else:
 
@@ -126,8 +128,6 @@ def parameters_computation(persons):
         # Maneira 2
         area1 = ellipse1.area - intersect.area
         area2 = ellipse2.area - intersect.area
-
-
 
         # Ellipse area area = pi * a * b
         sy = PSPACEY
@@ -139,7 +139,7 @@ def parameters_computation(persons):
         #b = a1/1.2
         sy = sx1 / 1.5
 
-        return (sx1,sy)
+        return (sx1, sy)
 
 
 class SpaceModeling:
@@ -241,7 +241,6 @@ class SpaceModeling:
                         sx = PSPACEX
                         sy = PSPACEY
 
-
                 # vis-a-vis arrangement
                 elif abs(round(persons[0][2] + math.pi, 2)) == abs(round(persons[1][2], 2)):
 
@@ -257,17 +256,14 @@ class SpaceModeling:
                     if sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
-                else: #other arrangements
-                    (sx,sy) = parameters_computation(persons)
-                    
-
+                else:  # other arrangements
+                    (sx, sy) = parameters_computation(persons)
 
                     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
                         sy = HUMAN_Y / 2
 
                     if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
                         sx = HUMAN_X / 2
-
 
 
 # Groups of > 2 elements:

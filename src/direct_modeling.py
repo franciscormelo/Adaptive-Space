@@ -7,7 +7,6 @@ import numpy as np
 import math
 
 
-
 def create_ellipse(center, lengths, angle=0):
     """
     create a shapely ellipse. adapted from
@@ -17,6 +16,8 @@ def create_ellipse(center, lengths, angle=0):
     ell = affinity.scale(circ, int(lengths[0]), int(lengths[1]))
     ellr = affinity.rotate(ell, angle)
     return ellr
+
+
 a = 4
 b = 2
 c1 = (2, 4)
@@ -36,15 +37,14 @@ ax.set_aspect('equal')
 # first ellipse in blue
 ellipse1 = create_ellipse(c1, (2, 4), 90)
 verts1 = np.array(ellipse1.exterior.coords.xy)
-patch1 = Polygon(verts1.T, color='blue', alpha=0.5, fill = False)
+patch1 = Polygon(verts1.T, color='blue', alpha=0.5, fill=False)
 ax.add_patch(patch1)
 
 # second ellipse in red
 ellipse2 = create_ellipse(c2, (2, 4), 0)
 verts2 = np.array(ellipse2.exterior.coords.xy)
-patch2 = Polygon(verts2.T, color='red', alpha=0.5, fill = False)
+patch2 = Polygon(verts2.T, color='red', alpha=0.5, fill=False)
 ax.add_patch(patch2)
-
 
 
 # the intersect will be outlined in black
@@ -74,13 +74,13 @@ print('intersect/ellipse2:', intersect.area / ellipse2.area)
 
 
 ######################################################
-#Maneira 2 area
-area1 = ellipse1.area- intersect.area
+# Maneira 2 area
+area1 = ellipse1.area - intersect.area
 area2 = ellipse2.area - intersect.area
-#ver quanto tirar de area a cada uma
+# ver quanto tirar de area a cada uma
 porpotion = 2
 # Ellipse area area = pi * a * b
-#por um factor que tem conta o angulo
+# por um factor que tem conta o angulo
 
 a1 = area1 / (math.pi * b)
 a2 = area2 / (math.pi * b)
@@ -92,7 +92,7 @@ a2 = area2 / (math.pi * b)
 ##################################################
 
 
-#area ellipse
+# area ellipse
 print("Maneira 2 " + str(a1))
 print("Maneira 2 " + str(a2))
 
@@ -101,10 +101,10 @@ print("Maneira 2 " + str(a2))
 
 #p = patches.Rectangle((np.amin(verts3[0]), np.amin(verts3[1])), diff, diff_y,fill=False)
 
-#ax.add_patch(p)
+# ax.add_patch(p)
 
 
-ellipse3 = create_ellipse(c1, (b,a1),90)
+ellipse3 = create_ellipse(c1, (b, a1), 90)
 verts3 = np.array(ellipse3.exterior.coords.xy)
 patch3 = Polygon(verts3.T, color='blue', alpha=0.5)
 ax.add_patch(patch3)
@@ -113,7 +113,6 @@ ellipse7 = create_ellipse(c2, (b, a2), 0)
 verts7 = np.array(ellipse7.exterior.coords.xy)
 patch7 = Polygon(verts7.T, color='blue', alpha=0.5)
 ax.add_patch(patch7)
-
 
 
 plt.show(block=False)
