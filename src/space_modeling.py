@@ -1,7 +1,8 @@
 #! /usr/bin/env python3
 
-"""Version ellipse function
-    default unit is cm
+"""
+@author Francisco Melo
+francisco.raposo.melo@tecnico.ulisboa.pt
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -10,6 +11,8 @@ import math
 from ellipse import *
 import statistics
 import sys
+from shapely.geometry.point import Point
+from shapely import affinity
 
 
 SHOW_PLOT = True
@@ -21,6 +24,9 @@ HUMAN_X = 37.5
 # Personal Space Maximum 45 - 120 cm
 PSPACEX = 80.0
 PSPACEY = 60.0
+
+#Porpotinal factor between pspace size in x and y axis
+PFACTOR = PSPACEX/PSPACEY
 
 
 def euclidean_distance(x1, y1, x2, y2):
@@ -87,7 +93,7 @@ def ellipse_intersection(ellipse1, ellipse2):
 
 
 
-def create_ellipse(center, lengths, angle=0):
+def create_shapely_ellipse(center, lengths, angle=0):
     """
     create a shapely ellipse. adapted from
     https://gis.stackexchange.com/a/243462
@@ -96,6 +102,44 @@ def create_ellipse(center, lengths, angle=0):
     ell = affinity.scale(circ, int(lengths[0]), int(lengths[1]))
     ellr = affinity.rotate(ell, angle)
     return ellr
+
+def parameters_computation(persons):
+    # first ellipse in blue
+    ellipse1 = create_shapely_ellipse((persons[0][0],persons[0][1]), (PSPACEY, PSPACEX), persons[0][2])
+    verts1 = np.array(ellipse1.exterior.coords.xy)
+
+    # second ellipse in red
+    ellipse2 = create_shapely_ellipse((persons[1][0],persons[1][1]), (PSPACEY, PSPACEX),  persons[1][2])
+    verts2 = np.array(ellipse2.exterior.coords.xy)
+
+
+    intersect = ellipse1.intersection(ellipse2)
+
+    # No intersection --> Default personal space
+    if intersect.is_empty:
+        return (PSPACEX,PSPACEY)
+
+    else:
+
+        verts3 = np.array(intersect.exterior.coords.xy)
+
+        # Maneira 2
+        area1 = ellipse1.area - intersect.area
+        area2 = ellipse2.area - intersect.area
+
+
+
+        # Ellipse area area = pi * a * b
+        sy = PSPACEY
+        sx1 = area1 / (math.pi * sy)
+        sx2 = area2 / (math.pi * sy)
+        # alternativa
+        # a1 = math.sqrt( (area1*1.2) / math.pi)
+        # a2 = math.sqrt( (area2*1.2) / math.pi)
+        #b = a1/1.2
+        sy = sx1 / 1.5
+
+        return (sx1,sy)
 
 
 class SpaceModeling:
@@ -156,7 +200,7 @@ class SpaceModeling:
             plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=group_radius - HUMAN_X / 2, x_cent=group_pose[0],
                          y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
-            # p Space Modeling
+            # P Space Modeling
             plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=group_radius + HUMAN_X / 2, x_cent=group_pose[0],
                          y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
@@ -175,21 +219,30 @@ class SpaceModeling:
                 d_sum = d_sum + euclidean_distance(persons[i][0], persons[i][1], persons[i + 1][0],
                                                    persons[i + 1][1])
             d_mean = d_sum / len(persons)
-    ############################################################################
+############################################################################
+    # Groups of 2 elements:
             if group_nb == 2:
 
-                # tentar fazer de maneira automatica mas por enquanto fazer por tipo de grupo
+                # Side-by-side arragement
                 if persons[0][2] == persons[1][2]:  # side-by-side
 
+                    #sy = parameters_computation(persons)
                     sy = euclidean_distance(persons[0][0], persons[0][1], persons[1][0],
                                             persons[1][1]) / 2
                     sx = sy * 1.5
+
+                    if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
+                        sy = HUMAN_Y / 2
+
+                    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
+                        sx = HUMAN_X / 2
 
                     if sy > PSPACEY:  # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
 
-                # vis-a-vis
+
+                # vis-a-vis arrangement
                 elif abs(round(persons[0][2] + math.pi, 2)) == abs(round(persons[1][2], 2)):
 
                     sx = euclidean_distance(persons[0][0], persons[0][1], persons[1][0],
@@ -198,19 +251,27 @@ class SpaceModeling:
 
                     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
                         sy = HUMAN_Y / 2
+                    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
+                        sx = HUMAN_X / 2
 
                     if sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
-                else:  # Other 2 persons group configurations
-                    sx = d_mean  # radius in x
-                    sy = sx / 1.5  # radius in y
+                else: #other arrangements
+                    (sx,sy) = parameters_computation(persons)
+                    
 
-                    if sx > PSPACEX or sy > PSPACEY:
-                        sx = PSPACEX
-                        sy = PSPACEY
 
-            # variar a maneira como e calculado tendo em conta o tipo de grupo
+                    if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
+                        sy = HUMAN_Y / 2
+
+                    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
+                        sx = HUMAN_X / 2
+
+
+
+# Groups of > 2 elements:
+
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
                 # Scaling factors for personal space
@@ -224,7 +285,7 @@ class SpaceModeling:
                 sy = PSPACEY
 
     ###############################################################################
-
+        # Possible approaching area computation and personal space ploting
             plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
 
             approaching_filter = approaching_area
