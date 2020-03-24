@@ -16,6 +16,7 @@ from shapely import affinity
 
 
 SHOW_PLOT = True
+
 # CONSTANTS
 # Human Body Dimensions top view in cm
 HUMAN_Y = 62.5
@@ -30,20 +31,20 @@ PFACTOR = PSPACEX / PSPACEY
 
 
 def euclidean_distance(x1, y1, x2, y2):
-    """ """
+    """Euclidean distance between two points in 2D."""
     dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     return dist
 
 
 def draw_arrow(x, y, angle):  # angle in radians
-    """ """
+    """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
     plt.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
               head_length=1, head_width=1, shape='full', color='blue')
 
 
 def draw_person_top(x, y, angle, ax):
-    """ """
+    """Draws a persons from a top view."""
     top_y = HUMAN_Y / 2
     top_x = HUMAN_X / 2
     plot_ellipse(semimaj=top_x, semimin=top_y,
@@ -51,7 +52,7 @@ def draw_person_top(x, y, angle, ax):
 
 
 def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
-    """ """
+    """Draws personal space of an inidivdual."""
     draw_arrow(x, y, angle)  # orientation arrow angle in radians
     ax.plot(x, y, 'bo', markersize=8)
     draw_person_top(x, y, angle, ax)
@@ -65,6 +66,7 @@ def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
 
 
 def approachingfiltering(personal_space, approaching_filter, idx):
+    """Filters the approaching area."""
     # Approaching Area filtering - remove points tha are inside the personal space of a person
     if idx == 1:
         approaching_filter = [(x, y) for x, y in zip(
@@ -78,7 +80,7 @@ def approachingfiltering(personal_space, approaching_filter, idx):
 
 
 def group_radius(persons, group_pose):
-    """ """
+    """Computes the radius of a group."""
     sum_radius = 0
     for i in range(len(persons)):
         # average of the distance between the group members and the center of the group, o-space radius
@@ -89,6 +91,7 @@ def group_radius(persons, group_pose):
 
 
 def ellipse_intersection(ellipse1, ellipse2):
+    """Checks if two ellipses intersect."""
 
     return ellipse1.intersection(ellipse2)
 
@@ -104,22 +107,35 @@ def create_shapely_ellipse(center, lengths, angle=0):
     return ellr
 
 
-def parameters_computation(persons):
+def minimimum_personalspace(sx, sy):
+    """Checks if the parameters are less the human dimensions."""
+    if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
+        sy = HUMAN_Y / 2
+
+    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
+        sx = HUMAN_X / 2
+
+    return(sx, sy)
+
+
+def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
+    """Estimates the parameters of the personal space to avoid intersections."""
     # first ellipse in blue
     ellipse1 = create_shapely_ellipse(
-        (persons[0][0], persons[0][1]), (PSPACEY, PSPACEX), persons[0][2])
+        (person1[0], person1[1]), (sigmay, sigmax), person1[2])
     verts1 = np.array(ellipse1.exterior.coords.xy)
 
     # second ellipse in red
     ellipse2 = create_shapely_ellipse(
-        (persons[1][0], persons[1][1]), (PSPACEY, PSPACEX),  persons[1][2])
+        (person2[0], person2[1]), (sigmay, sigmax),  person2[2])
+
     verts2 = np.array(ellipse2.exterior.coords.xy)
 
     intersect = ellipse1.intersection(ellipse2)
 
-    # No intersection --> Default personal space
+    # No intersection --> personal space input dimensions
     if intersect.is_empty:
-        return (PSPACEX, PSPACEY)
+        return (sigmax, sigmay)
 
     else:
 
@@ -130,13 +146,15 @@ def parameters_computation(persons):
         area2 = ellipse2.area - intersect.area
 
         # Ellipse area area = pi * a * b
+
+        # Quanto reduzo a cada um?? ver angulo entre estes
         sy = PSPACEY
         sx1 = area1 / (math.pi * sy)
         sx2 = area2 / (math.pi * sy)
         # alternativa
         # a1 = math.sqrt( (area1*1.2) / math.pi)
         # a2 = math.sqrt( (area2*1.2) / math.pi)
-        #b = a1/1.2
+        # b = a1/1.2
         sy = sx1 / PFACTOR
 
         return (sx1, sy)
@@ -186,6 +204,7 @@ class SpaceModeling:
         """ """
         f, ax = plt.subplots(1)
 
+        # Iterate over groups
         for k in range(len(self.group_nb)):
             print("Modeling Group " + str(k + 1) + " ...")
 
@@ -213,33 +232,30 @@ class SpaceModeling:
 
             # compute mean distance between group members
             d_sum = 0
-################################# Meter em função ##############################
-            for i in range(len(persons) - 1):
-                # average of the distance between group members
-                d_sum = d_sum + euclidean_distance(persons[i][0], persons[i][1], persons[i + 1][0],
-                                                   persons[i + 1][1])
-            d_mean = d_sum / len(persons)
-############################################################################
+# ################################# Meter em função ##############################
+#             for i in range(len(persons) - 1):
+#                 # average of the distance between group members
+#                 d_sum = d_sum + euclidean_distance(persons[i][0], persons[i][1], persons[i + 1][0],
+#                                                    persons[i + 1][1])
+#             d_mean = d_sum / len(persons)
+# ############################################################################
     # Groups of 2 elements:
             if group_nb == 2:
 
                 # Side-by-side arragement
-                if persons[0][2] == persons[1][2]:  # side-by-side
+                if round(persons[0][2]) == round(persons[1][2]):  # side-by-side
 
-                    #sy = parameters_computation(persons)
+                    # sy = parameters_computation(persons)
                     sy = euclidean_distance(persons[0][0], persons[0][1], persons[1][0],
                                             persons[1][1]) / 2
                     sx = sy * PFACTOR
 
-                    if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
-                        sy = HUMAN_Y / 2
-
-                    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
-                        sx = HUMAN_X / 2
-
-                    if sy > PSPACEY:  # if the persons are too far away from each other the personal space should be limited
+                    if sy > PSPACEY or sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
+                    else:
+                        # Check if the parameters are less then human dimensions
+                        (sx, sy) = minimimum_personalspace(sx, sy)
 
                 # vis-a-vis arrangement
                 elif abs(round(persons[0][2] + math.pi, 2)) == abs(round(persons[1][2], 2)):
@@ -248,33 +264,40 @@ class SpaceModeling:
                                             persons[1][1]) / 2
                     sy = sx / PFACTOR
 
-                    if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
-                        sy = HUMAN_Y / 2
-                    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
-                        sx = HUMAN_X / 2
-
-                    if sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
+                    if sy > PSPACEY or sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
                         sx = PSPACEX
                         sy = PSPACEY
+                    else:
+                        # Check if the parameters are less then human dimensions
+                        (sx, sy) = minimimum_personalspace(sx, sy)
+
                 else:  # other arrangements
-                    (sx, sy) = parameters_computation(persons)
 
-                    if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
-                        sy = HUMAN_Y / 2
-
-                    if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
-                        sx = HUMAN_X / 2
+                    (sx, sy) = parameters_computation(
+                        persons[0], persons[1], sigmax=PSPACEX, sigmay=PSPACEY)
+                    # Check if the parameters are less then human dimensions
+                    (sx, sy) = minimimum_personalspace(sx, sy)
 
 
 # Groups of > 2 elements:
-
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
-                # Scaling factors for personal space
-                sx = d_mean  # radius in x
-                sy = sx / PFACTOR  # radius in y
-                if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
-                    sy = HUMAN_Y / 2
+                # # # Scaling factors for personal space
+                # sx = d_mean  # radius in x
+                # sy = sx / PFACTOR  # radius in y
+
+                sx = PSPACEX
+                sy = PSPACEY
+
+                for i in range(len(persons) - 1):
+                    (sx, sy) = parameters_computation(
+                        persons[i], persons[i + 1], sigmax=sx, sigmay=sy)
+
+                # checks for intersectipn between the first and last group element
+                (sx, sy) = parameters_computation(
+                    persons[0], persons[-1], sigmax=sx, sigmay=sy)
+                # Check if the parameters are less then human dimensions
+                (sx, sy) = minimimum_personalspace(sx, sy)
 
             if sx > PSPACEX or sy > PSPACEY:  # if the persons are too far away from each other the personal space should be limited
                 sx = PSPACEX
@@ -301,10 +324,10 @@ class SpaceModeling:
 
             ax.plot(approaching_x, approaching_y, 'c.',  markersize=5)
 
-            #x = [item[0] for item in persons]
-            #y = [item[1] for item in persons]
+            # x = [item[0] for item in persons]
+            # y = [item[1] for item in persons]
             # ax.plot([persons[0][0],persons[1][0]],[persons[0][1],persons[1][1]])
-            #ax.plot(x, y, 'g')
+            # ax.plot(x, y, 'g')
 
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
