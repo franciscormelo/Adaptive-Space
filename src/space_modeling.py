@@ -230,15 +230,6 @@ class SpaceModeling:
             approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
                                             y_cent=group_pose[1], data_out=True)
 
-            # compute mean distance between group members
-            d_sum = 0
-# ################################# Meter em função ##############################
-#             for i in range(len(persons) - 1):
-#                 # average of the distance between group members
-#                 d_sum = d_sum + euclidean_distance(persons[i][0], persons[i][1], persons[i + 1][0],
-#                                                    persons[i + 1][1])
-#             d_mean = d_sum / len(persons)
-# ############################################################################
     # Groups of 2 elements:
             if group_nb == 2:
 
@@ -282,10 +273,6 @@ class SpaceModeling:
 # Groups of > 2 elements:
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
-                # # # Scaling factors for personal space
-                # sx = d_mean  # radius in x
-                # sy = sx / PFACTOR  # radius in y
-
                 sx = PSPACEX
                 sy = PSPACEY
 
@@ -314,7 +301,7 @@ class SpaceModeling:
                 personal_space = draw_personalspace(
                     person[0], person[1], person[2], ax, sx, sy, plot_kwargs, idx)
 
-                # Approaching Area filtering - remove points tha are inside the personal space of a person
+                # Approaching Area filtering - remove points that are inside the personal space of a person
                 approaching_filter = approachingfiltering(
                     personal_space, approaching_filter, idx)
 
