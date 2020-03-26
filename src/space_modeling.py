@@ -133,6 +133,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
     intersect = ellipse1.intersection(ellipse2)
 
+
     # No intersection --> personal space input dimensions
     if intersect.is_empty:
         return (sigmax, sigmay)
@@ -142,13 +143,21 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         verts3 = np.array(intersect.exterior.coords.xy)
 
         # Maneira 2
-        diff_angles = abs(person1[2]- person2[2])
-
-
-        afactor = (diff_angles/(2*math.pi)) + 1
+        diff_angles = abs(person1[2] - person2[2])
+        # print(diff_angles)
+        # print(intersect.area)
+        if diff_angles == round(0):
+############# corrigir
+            afactor = 100
+###########
+        else:
+            afactor = (diff_angles / (2 * math.pi)) + 1
         #afactor = 1
+
         area1 = ellipse1.area - (afactor * intersect.area)
         area2 = ellipse2.area - (afactor * intersect.area)
+
+        # variar porpocao com area de intersecao
 
         # Ellipse area area = pi * a * b
 
@@ -270,6 +279,7 @@ class SpaceModeling:
                 for i in range(len(persons) - 1):
                     w = i
                     for j in range(w + 1, len(persons)):
+
 
                         (sx, sy) = parameters_computation(
                             persons[i], persons[j], sigmax=sx, sigmay=sy)
