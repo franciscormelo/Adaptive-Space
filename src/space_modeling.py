@@ -277,15 +277,15 @@ class SpaceModeling:
                 sy = PSPACEY
 
                 for i in range(len(persons) - 1):
-                    (sx, sy) = parameters_computation(
-                        persons[i], persons[i + 1], sigmax=sx, sigmay=sy)
+                    w = i
+                    for j in range(w + 1, len(persons)):
 
-                # checks for intersectipn between the first and last group element
-                (sx, sy) = parameters_computation(
-                    persons[0], persons[-1], sigmax=sx, sigmay=sy)
-                # Check if the parameters are less then human dimensions
-                (sx, sy) = minimimum_personalspace(sx, sy)
+                        (sx, sy) = parameters_computation(
+                            persons[i], persons[j], sigmax=sx, sigmay=sy)
 
+            # Check if the parameters are less then human dimensions
+            (sx, sy) = minimimum_personalspace(sx, sy)
+                
             if sx > PSPACEX or sy > PSPACEY:  # if the persons are too far away from each other the personal space should be limited
                 sx = PSPACEX
                 sy = PSPACEY
