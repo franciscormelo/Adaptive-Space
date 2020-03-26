@@ -148,14 +148,18 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         # Ellipse area area = pi * a * b
 
         # Quanto reduzo a cada um?? ver angulo entre estes
-        sy = PSPACEY
+        sy = sigmay
         sx1 = area1 / (math.pi * sy)
         sx2 = area2 / (math.pi * sy)
-        # alternativa
-        # a1 = math.sqrt( (area1*1.2) / math.pi)
-        # a2 = math.sqrt( (area2*1.2) / math.pi)
-        # b = a1/1.2
         sy = sx1 / PFACTOR
+
+
+        #########
+
+        # sx1 = math.sqrt( (area1*PFACTOR) / math.pi)
+        # sx1 = math.sqrt( (area2*PFACTOR) / math.pi)
+        # sy = sx1/PFACTOR
+        ########
 
         return (sx1, sy)
 
@@ -285,7 +289,7 @@ class SpaceModeling:
 
             # Check if the parameters are less then human dimensions
             (sx, sy) = minimimum_personalspace(sx, sy)
-                
+
             if sx > PSPACEX or sy > PSPACEY:  # if the persons are too far away from each other the personal space should be limited
                 sx = PSPACEX
                 sy = PSPACEY
