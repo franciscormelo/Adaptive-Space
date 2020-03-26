@@ -142,8 +142,13 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         verts3 = np.array(intersect.exterior.coords.xy)
 
         # Maneira 2
-        area1 = ellipse1.area - intersect.area
-        area2 = ellipse2.area - intersect.area
+        diff_angles = abs(person1[2]- person2[2])
+
+
+        afactor = (diff_angles/(2*math.pi)) + 1
+        #afactor = 1
+        area1 = ellipse1.area - (afactor * intersect.area)
+        area2 = ellipse2.area - (afactor * intersect.area)
 
         # Ellipse area area = pi * a * b
 
@@ -152,7 +157,6 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         sx1 = area1 / (math.pi * sy)
         sx2 = area2 / (math.pi * sy)
         sy = sx1 / PFACTOR
-
 
         #########
 
@@ -245,13 +249,6 @@ class SpaceModeling:
                                             persons[1][1]) / 2
                     sx = sy * PFACTOR
 
-                    if sy > PSPACEY or sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
-                        sx = PSPACEX
-                        sy = PSPACEY
-                    else:
-                        # Check if the parameters are less then human dimensions
-                        (sx, sy) = minimimum_personalspace(sx, sy)
-
                 # vis-a-vis arrangement
                 elif abs(round(persons[0][2] + math.pi, 2)) == abs(round(persons[1][2], 2)):
 
@@ -259,22 +256,12 @@ class SpaceModeling:
                                             persons[1][1]) / 2
                     sy = sx / PFACTOR
 
-                    if sy > PSPACEY or sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
-                        sx = PSPACEX
-                        sy = PSPACEY
-                    else:
-                        # Check if the parameters are less then human dimensions
-                        (sx, sy) = minimimum_personalspace(sx, sy)
-
-                else:  # other arrangements
-
+                # other arrangements
+                else:
                     (sx, sy) = parameters_computation(
                         persons[0], persons[1], sigmax=PSPACEX, sigmay=PSPACEY)
-                    # Check if the parameters are less then human dimensions
-                    (sx, sy) = minimimum_personalspace(sx, sy)
 
-
-# Groups of > 2 elements:
+# Groups with > 2 elements:
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
                 sx = PSPACEX
@@ -287,14 +274,14 @@ class SpaceModeling:
                         (sx, sy) = parameters_computation(
                             persons[i], persons[j], sigmax=sx, sigmay=sy)
 
-            # Check if the parameters are less then human dimensions
-            (sx, sy) = minimimum_personalspace(sx, sy)
-
-            if sx > PSPACEX or sy > PSPACEY:  # if the persons are too far away from each other the personal space should be limited
+            # Check if the parameteres are possible
+            if sy > PSPACEY or sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
                 sx = PSPACEX
                 sy = PSPACEY
+            else:
+                # Check if the parameters are less then human dimensions
+                (sx, sy) = minimimum_personalspace(sx, sy)
 
-    ###############################################################################
         # Possible approaching area computation and personal space ploting
             plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
 
