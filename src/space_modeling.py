@@ -13,7 +13,7 @@ import statistics
 import sys
 from shapely.geometry.point import Point
 from shapely import affinity
-
+from typing import Any, Union
 
 SHOW_PLOT = True
 
@@ -115,7 +115,7 @@ def minimimum_personalspace(sx, sy):
     if sx < HUMAN_X / 2:  # the personal space should be at least the size of the individual
         sx = HUMAN_X / 2
 
-    return(sx, sy)
+    return sx, sy
 
 
 def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
@@ -123,36 +123,30 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     # first ellipse in blue
     ellipse1 = create_shapely_ellipse(
         (person1[0], person1[1]), (sigmay, sigmax), person1[2])
-    verts1 = np.array(ellipse1.exterior.coords.xy)
 
     # second ellipse in red
     ellipse2 = create_shapely_ellipse(
-        (person2[0], person2[1]), (sigmay, sigmax),  person2[2])
-
-    verts2 = np.array(ellipse2.exterior.coords.xy)
+        (person2[0], person2[1]), (sigmay, sigmax), person2[2])
 
     intersect = ellipse1.intersection(ellipse2)
 
-
     # No intersection --> personal space input dimensions
     if intersect.is_empty:
-        return (sigmax, sigmay)
+        return sigmax, sigmay
 
     else:
-
-        verts3 = np.array(intersect.exterior.coords.xy)
 
         # Maneira 2
         diff_angles = abs(person1[2] - person2[2])
         # print(diff_angles)
         # print(intersect.area)
         if diff_angles == round(0):
-############# corrigir
+            # corrigir
             afactor = 100
-###########
+        ###########
         else:
             afactor = (diff_angles / (2 * math.pi)) + 1
-        #afactor = 1
+        # afactor = 1
 
         area1 = ellipse1.area - (afactor * intersect.area)
         area2 = ellipse2.area - (afactor * intersect.area)
@@ -174,7 +168,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         # sy = sx1/PFACTOR
         ########
 
-        return (sx1, sy)
+        return sx1, sy
 
 
 class SpaceModeling:
@@ -247,7 +241,7 @@ class SpaceModeling:
             approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
                                             y_cent=group_pose[1], data_out=True)
 
-    # Groups of 2 elements:
+            # Groups of 2 elements:
             if group_nb == 2:
 
                 # Side-by-side arragement
@@ -270,7 +264,7 @@ class SpaceModeling:
                     (sx, sy) = parameters_computation(
                         persons[0], persons[1], sigmax=PSPACEX, sigmay=PSPACEY)
 
-# Groups with > 2 elements:
+            # Groups with > 2 elements:
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
                 sx = PSPACEX
@@ -279,26 +273,24 @@ class SpaceModeling:
                 for i in range(len(persons) - 1):
                     w = i
                     for j in range(w + 1, len(persons)):
-
-
                         (sx, sy) = parameters_computation(
                             persons[i], persons[j], sigmax=sx, sigmay=sy)
 
-            # Check if the parameteres are possible
-            if sy > PSPACEY or sx > PSPACEX:  # if the persons are too far away from each other the personal space should be limited
+            # Check if the parameters are possible
+            # If the persons are too far away from each other the personal space should be limited
+            if sy > PSPACEY or sx > PSPACEX:
                 sx = PSPACEX
                 sy = PSPACEY
             else:
                 # Check if the parameters are less then human dimensions
                 (sx, sy) = minimimum_personalspace(sx, sy)
 
-        # Possible approaching area computation and personal space ploting
+            # Possible approaching area computation and personal space ploting
             plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
 
             approaching_filter = approaching_area
 
             for idx, person in enumerate(persons, start=1):
-
                 personal_space = draw_personalspace(
                     person[0], person[1], person[2], ax, sx, sy, plot_kwargs, idx)
 
@@ -310,7 +302,7 @@ class SpaceModeling:
             approaching_x = [j[0] for j in approaching_filter]
             approaching_y = [k[1] for k in approaching_filter]
 
-            ax.plot(approaching_x, approaching_y, 'c.',  markersize=5)
+            ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
 
             # x = [item[0] for item in persons]
             # y = [item[1] for item in persons]
@@ -321,7 +313,7 @@ class SpaceModeling:
         plt.ylabel('y [cm]')
         plt.savefig('destination_path.eps', format='eps')
 
-        if SHOW_PLOT == True:
+        if SHOW_PLOT:
             plt.show(block=False)
             print("==================================================")
             input("Hit Enter To Close... ")
