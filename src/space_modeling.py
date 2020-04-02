@@ -28,6 +28,8 @@ PSPACEY = 60.0
 # Porpotinal factor between pspace size in x and y axis
 PFACTOR = PSPACEX / PSPACEY
 
+INCREMENT = 1
+
 
 def euclidean_distance(x1, y1, x2, y2):
     """Euclidean distance between two points in 2D."""
@@ -107,7 +109,7 @@ def create_shapely_ellipse(center, lengths, angle=0):
 
 
 def minimimum_personalspace(sx, sy):
-    """Checks if the parameters are less the human dimensions."""
+    """Checks if the parameters are at least the human body dimensions."""
     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
         sy = HUMAN_Y / 2
 
@@ -137,16 +139,28 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
         # Maneira 2
         diff_angles = abs(person1[2] - person2[2])
-        # print(diff_angles)
-        # print(intersect.area)
+
         if diff_angles == round(0):
             # corrigir
             afactor = 100
         ###########
+
         else:
             # Generates a weight between 1 and 2 based on the difference of the angles
-            afactor = (diff_angles / (2 * math.pi)) + 1
-        # afactor = 1
+            # INCREMENT = 1
+
+            # Squared
+            afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
+
+            # Linear
+            #afactor = (diff_angles / (2 * math.pi)) + INCREMENT
+
+            # Exponential
+            #afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
+
+            # Logarithmic
+            #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
+
 
         area1 = ellipse1.area - (afactor * intersect.area)
         area2 = ellipse2.area - (afactor * intersect.area)
@@ -161,13 +175,6 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         sx2 = area2 / (math.pi * sy)
 
         sy = sx1 / PFACTOR
-
-        #########
-
-        # sx1 = math.sqrt( (area1*PFACTOR) / math.pi)
-        # sx1 = math.sqrt( (area2*PFACTOR) / math.pi)
-        # sy = sx1/PFACTOR
-        ########
 
         return sx1, sy
 
@@ -248,7 +255,6 @@ class SpaceModeling:
                 # Side-by-side arragement
                 if round(persons[0][2]) == round(persons[1][2]):  # side-by-side
 
-                    # sy = parameters_computation(persons)
                     sy = euclidean_distance(persons[0][0], persons[0][1], persons[1][0],
                                             persons[1][1]) / 2
                     sx = sy * PFACTOR
@@ -271,6 +277,7 @@ class SpaceModeling:
                 sx = PSPACEX
                 sy = PSPACEY
 
+                # Checks for intersections between all members of the group
                 for i in range(len(persons) - 1):
                     w = i
                     for j in range(w + 1, len(persons)):
@@ -323,7 +330,8 @@ class SpaceModeling:
 
 def main():
     if len(sys.argv) > 1:
-        with open(sys.argv[1]) as fh:
+        file = "data/" + sys.argv[1]
+        with open(file) as fh:
             app = SpaceModeling(fh)
             app.solve()
 
