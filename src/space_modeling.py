@@ -1,8 +1,7 @@
 #! /usr/bin/env python3
 
 """
-@author Francisco Melo
-francisco.raposo.melo@tecnico.ulisboa.pt
+ Space Modeling
 """
 import numpy as np
 import matplotlib.pyplot as plt
@@ -145,6 +144,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
             afactor = 100
         ###########
         else:
+            # Generates a weight between 1 and 2 based on the difference of the angles
             afactor = (diff_angles / (2 * math.pi)) + 1
         # afactor = 1
 
@@ -155,10 +155,11 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
         # Ellipse area area = pi * a * b
 
-        # Quanto reduzo a cada um?? ver angulo entre estes
         sy = sigmay
+        # a = area/(pi * b)
         sx1 = area1 / (math.pi * sy)
         sx2 = area2 / (math.pi * sy)
+
         sy = sx1 / PFACTOR
 
         #########
@@ -174,7 +175,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 class SpaceModeling:
 
     def __init__(self, fh):
-        """ """
+        """ Models the personal space, group space and estimates the possibles approaching areas"""
 
         # Lists Initialization
 
