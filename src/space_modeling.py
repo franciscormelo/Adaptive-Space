@@ -37,6 +37,18 @@ def euclidean_distance(x1, y1, x2, y2):
     return dist
 
 
+def rotate(px, py, angle):
+    """
+    Rotate a point counterclockwise by a given angle around a given origin.
+
+    The angle should be given in radians.
+    """
+
+    qx = math.cos(angle) * px - math.sin(angle) * py
+    qy = math.sin(angle) * px + math.cos(angle) * py
+    return qx, qy
+
+
 def draw_arrow(x, y, angle):  # angle in radians
     """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
@@ -140,10 +152,21 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         # Maneira 2
         diff_angles = abs(person1[2] - person2[2])
 
+        # If the members of the group have the same orientation
         if diff_angles == round(0):
-            # corrigir
-            afactor = 100
-        ###########
+
+            # Calculation of the angle between the persons
+
+            # Rotation of the person to compute the angle between them
+            (px1, py1) = rotate(person1[0], person1[1], person1[2])  # ?
+            (px2, py2) = rotate(person2[0], person2[1], person2[2])  # ?
+
+            hip = euclidean_distance(px1, py1, px2, py2)
+            co = abs(px2 - px1)
+            angle = math.sin(co / hip) #nao esta bem
+
+            afactor = ((angle / (2 * math.pi)) + INCREMENT)**2
+            afactor = afactor
 
         else:
             # Generates a weight between 1 and 2 based on the difference of the angles
@@ -151,6 +174,8 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
             # Squared
             afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
+
+
 
             # Linear
             #afactor = (diff_angles / (2 * math.pi)) + INCREMENT
@@ -162,14 +187,15 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
             #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
 
 
-        area1 = ellipse1.area - (afactor * intersect.area)
-        area2 = ellipse2.area - (afactor * intersect.area)
+        afactor = 1
+        area1 = ellipse1.area - (afactor * 1.3* intersect.area) #vezes 2 ou nao adicionar configuracao iterativamente
+        area2 = ellipse2.area - (afactor * 1.3* intersect.area)
 
         # variar porpocao com area de intersecao
-
         # Ellipse area area = pi * a * b
 
         sy = sigmay
+
         # a = area/(pi * b)
         sx1 = area1 / (math.pi * sy)
         sx2 = area2 / (math.pi * sy)
@@ -299,6 +325,7 @@ class SpaceModeling:
             approaching_filter = approaching_area
 
             for idx, person in enumerate(persons, start=1):
+
                 personal_space = draw_personalspace(
                     person[0], person[1], person[2], ax, sx, sy, plot_kwargs, idx)
 
@@ -322,6 +349,7 @@ class SpaceModeling:
         plt.savefig('destination_path.eps', format='eps')
 
         if SHOW_PLOT:
+            plt.tight_layout()
             plt.show(block=False)
             print("==================================================")
             input("Hit Enter To Close... ")
