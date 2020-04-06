@@ -109,6 +109,19 @@ def ellipse_intersection(ellipse1, ellipse2):
     return ellipse1.intersection(ellipse2)
 
 
+def pspace_intersection(person1, person2, sigmax, sigmay):
+    """ """
+
+    ellipse1 = create_shapely_ellipse(
+        (person1[0], person1[1]), (sigmay, sigmax), person1[2])
+
+    # second ellipse in red
+    ellipse2 = create_shapely_ellipse(
+        (person2[0], person2[1]), (sigmay, sigmax), person2[2])
+
+    return ellipse_intersection(ellipse1, ellipse2)
+
+
 def create_shapely_ellipse(center, lengths, angle=0):
     """
     create a shapely ellipse. adapted from
@@ -132,8 +145,7 @@ def minimimum_personalspace(sx, sy):
 
 
 def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
-    """Estimates the parameters of the personal space to avoid intersections."""
-    # first ellipse in blue
+    """Estimates the parameters of the personal space to avoid personal space intersections."""
     ellipse1 = create_shapely_ellipse(
         (person1[0], person1[1]), (sigmay, sigmax), person1[2])
 
@@ -141,7 +153,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     ellipse2 = create_shapely_ellipse(
         (person2[0], person2[1]), (sigmay, sigmax), person2[2])
 
-    intersect = ellipse1.intersection(ellipse2)
+    intersect = ellipse_intersection(ellipse1, ellipse2)
 
     # No intersection --> personal space input dimensions
     if intersect.is_empty:
@@ -151,7 +163,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
         # Maneira 2
         diff_angles = abs(person1[2] - person2[2])
-
+###########CORRIGIR#########################
         # If the members of the group have the same orientation
         if diff_angles == round(0):
 
@@ -163,33 +175,32 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
             hip = euclidean_distance(px1, py1, px2, py2)
             co = abs(px2 - px1)
-            angle = math.sin(co / hip) #nao esta bem
+            angle = math.sin(co / hip)  # nao esta bem
 
             afactor = ((angle / (2 * math.pi)) + INCREMENT)**2
-            afactor = afactor
 
+##############################################
         else:
             # Generates a weight between 1 and 2 based on the difference of the angles
             # INCREMENT = 1
 
             # Squared
-            afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
-
-
+            #afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
 
             # Linear
-            #afactor = (diff_angles / (2 * math.pi)) + INCREMENT
+            afactor = (diff_angles / (2 * math.pi)) + INCREMENT
 
             # Exponential
             #afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
 
             # Logarithmic
             #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
+            pass
 
-
-        afactor = 1
-        area1 = ellipse1.area - (afactor * 1.3* intersect.area) #vezes 2 ou nao adicionar configuracao iterativamente
-        area2 = ellipse2.area - (afactor * 1.3* intersect.area)
+        #afactor = 1
+        # vezes 2 ou nao adicionar configuracao iterativamente
+        area1 = ellipse1.area - (afactor * 1 * intersect.area)
+        #area2 = ellipse2.area - (afactor * 2 * intersect.area)
 
         # variar porpocao com area de intersecao
         # Ellipse area area = pi * a * b
@@ -198,11 +209,27 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
         # a = area/(pi * b)
         sx1 = area1 / (math.pi * sy)
-        sx2 = area2 / (math.pi * sy)
+        #sx2 = area2 / (math.pi * sy)
 
         sy = sx1 / PFACTOR
 
         return sx1, sy
+
+
+def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
+
+    intersect = pspace_intersection(person1, person2, sigmax, sigmay)
+
+    sx = sigmax
+    sy = sigmay
+
+    while not intersect.is_empty:
+        (sx, sy) = parameters_computation(person1, person2, sx, sy)
+
+        intersect = pspace_intersection(person1, person2, sx, sy)
+        print(intersect.area)
+
+    return sx, sy
 
 
 class SpaceModeling:
@@ -294,7 +321,8 @@ class SpaceModeling:
 
                 # other arrangements
                 else:
-                    (sx, sy) = parameters_computation(
+
+                    (sx, sy) = iterative_intersections(
                         persons[0], persons[1], sigmax=PSPACEX, sigmay=PSPACEY)
 
             # Groups with > 2 elements:
@@ -307,7 +335,7 @@ class SpaceModeling:
                 for i in range(len(persons) - 1):
                     w = i
                     for j in range(w + 1, len(persons)):
-                        (sx, sy) = parameters_computation(
+                        (sx, sy) = iterative_intersections(
                             persons[i], persons[j], sigmax=sx, sigmay=sy)
 
             # Check if the parameters are possible
