@@ -218,11 +218,11 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY,):
     sx = sigmax
     sy = sigmay
 
-    #while intersect.area != 0:
+    while intersect.area != 0:
 
-    (sx, sy) = parameters_computation(person1, person2, sx, sy)
+        (sx, sy) = parameters_computation(person1, person2, sx, sy)
 
-    intersect = pspace_intersection(person1, person2, sx, sy)
+        intersect = pspace_intersection(person1, person2, sx, sy)
 
 
     return sx, sy
