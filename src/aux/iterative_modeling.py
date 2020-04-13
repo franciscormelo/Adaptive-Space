@@ -21,18 +21,20 @@ fig, ax = plt.subplots()
 # these next few lines are pretty important because
 # otherwise your ellipses might only be displayed partly
 # or may be distorted
-ax.set_xlim([-5, 15])
-ax.set_ylim([-5, 15])
+ax.set_xlim([-1000, 1000])
+ax.set_ylim([-1000, 1000])
 ax.set_aspect('equal')
 
+
+
 # first ellipse in blue
-ellipse1 = create_ellipse((0, 4), (2, 4), 90)
+ellipse1 = create_ellipse((600, 320), (60, 80), -90)
 verts1 = np.array(ellipse1.exterior.coords.xy)
 patch1 = Polygon(verts1.T, color='blue', alpha=0.5)
 ax.add_patch(patch1)
 
 # second ellipse in red
-ellipse2 = create_ellipse((4, 7), (2, 4), 0)
+ellipse2 = create_ellipse((670, 250), (60, 80), -180)
 verts2 = np.array(ellipse2.exterior.coords.xy)
 patch2 = Polygon(verts2.T, color='red', alpha=0.5)
 ax.add_patch(patch2)
@@ -44,22 +46,25 @@ patch3 = Polygon(verts3.T, facecolor='none', edgecolor='black')
 ax.add_patch(patch3)
 
 
-diff = 0.1
+diff = 1
 print('area of intersect:', intersect.area)
-sx = 2
-sy = 4
-while round(intersect.area) != 0:
+sx = 80
+sy = 60
+while (intersect.area) != 0:
     if sx >= 0 and sy >= 0:
-        #sx = sx - diff
-        sy = sy - diff
+        sx = sx - diff
+        #sy = sy - diff
+        st = sx / 1.5
+
 
         # first ellipse in blue
-        ellipse1 = create_ellipse((0, 4), (sx, sy), 90)
+        ellipse1 = create_ellipse((600, 320), (sx, sy), -90)
 
         # second ellipse in red
-        ellipse2 = create_ellipse((4, 7), (sx, sy), 0)
+        ellipse2 = create_ellipse((670, 250), (sx, sy), -180)
 
         intersect = ellipse1.intersection(ellipse2)
+        print("Sx = " + str(sx) + " Sy = " + str(sy))
         print('area of intersect:', intersect.area)
 
 

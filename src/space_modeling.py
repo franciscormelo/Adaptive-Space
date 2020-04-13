@@ -195,7 +195,6 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
             # Logarithmic
             #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
-            pass
 
         #afactor = 1
         # vezes 2 ou nao adicionar configuracao iterativamente
