@@ -11,6 +11,7 @@ from ellipse import *
 import statistics
 import sys
 from shapely.geometry.point import Point
+from matplotlib.patches import Polygon
 from shapely import affinity
 from typing import Any, Union
 
@@ -113,11 +114,11 @@ def pspace_intersection(person1, person2, sigmax, sigmay):
     """ """
 
     ellipse1 = create_shapely_ellipse(
-        (person1[0], person1[1]), (sigmay, sigmax), person1[2])
+        (person1[0], person1[1]), (sigmax, sigmay), person1[2])
 
     # second ellipse in red
     ellipse2 = create_shapely_ellipse(
-        (person2[0], person2[1]), (sigmay, sigmax), person2[2])
+        (person2[0], person2[1]), (sigmax, sigmay), person2[2])
 
     return ellipse_intersection(ellipse1, ellipse2)
 
@@ -127,6 +128,7 @@ def create_shapely_ellipse(center, lengths, angle=0):
     create a shapely ellipse. adapted from
     https://gis.stackexchange.com/a/243462
     """
+    angle = math.degrees(angle)
     circ = Point(center).buffer(1)
     ell = affinity.scale(circ, int(lengths[0]), int(lengths[1]))
     ellr = affinity.rotate(ell, angle)
@@ -147,86 +149,81 @@ def minimimum_personalspace(sx, sy):
 def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     """Estimates the parameters of the personal space to avoid personal space intersections."""
     ellipse1 = create_shapely_ellipse(
-        (person1[0], person1[1]), (sigmay, sigmax), person1[2])
+        (person1[0], person1[1]), (sigmax, sigmay), person1[2])
 
     # second ellipse in red
     ellipse2 = create_shapely_ellipse(
-        (person2[0], person2[1]), (sigmay, sigmax), person2[2])
+        (person2[0], person2[1]), (sigmax, sigmay), person2[2])
 
     intersect = ellipse_intersection(ellipse1, ellipse2)
 
-    # No intersection --> personal space input dimensions
-    if intersect.is_empty:
-        return sigmax, sigmay
-
-    else:
-
-        # Maneira 2
-        diff_angles = abs(person1[2] - person2[2])
+    # Maneira 2
+    diff_angles = abs(person1[2] - person2[2])
 ###########CORRIGIR#########################
-        # If the members of the group have the same orientation
-        if diff_angles == round(0):
+    # If the members of the group have the same orientation
+    if diff_angles == round(0):
 
-            # Calculation of the angle between the persons
+        # Calculation of the angle between the persons
 
-            # Rotation of the person to compute the angle between them
-            (px1, py1) = rotate(person1[0], person1[1], person1[2])  # ?
-            (px2, py2) = rotate(person2[0], person2[1], person2[2])  # ?
+        # Rotation of the person to compute the angle between them
+        (px1, py1) = rotate(person1[0], person1[1], person1[2])  # ?
+        (px2, py2) = rotate(person2[0], person2[1], person2[2])  # ?
 
-            hip = euclidean_distance(px1, py1, px2, py2)
-            co = abs(px2 - px1)
-            angle = math.sin(co / hip)  # nao esta bem
+        hip = euclidean_distance(px1, py1, px2, py2)
+        co = abs(px2 - px1)
+        angle = math.sin(co / hip)  # nao esta bem
 
-            afactor = ((angle / (2 * math.pi)) + INCREMENT)**2
+        afactor = ((angle / (2 * math.pi)) + INCREMENT)**2
 
 ##############################################
-        else:
-            # Generates a weight between 1 and 2 based on the difference of the angles
-            # INCREMENT = 1
+    else:
+        # Generates a weight between 1 and 2 based on the difference of the angles
+        # INCREMENT = 1
 
-            # Squared
-            #afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
+        # Squared
+        #afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
 
-            # Linear
-            afactor = (diff_angles / (2 * math.pi)) + INCREMENT
+        # Linear
+        afactor = (diff_angles / (2 * math.pi)) + INCREMENT
 
-            # Exponential
-            #afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
+        # Exponential
+        #afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
 
-            # Logarithmic
-            #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
+        # Logarithmic
+        #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
 
-        #afactor = 1
-        # vezes 2 ou nao adicionar configuracao iterativamente
-        area1 = ellipse1.area - (afactor * 1 * intersect.area)
-        #area2 = ellipse2.area - (afactor * 2 * intersect.area)
+    #afactor = 1
+    # vezes 2 ou nao adicionar configuracao iterativamente
+    area1 = ellipse1.area - (afactor * 1 * intersect.area)
+    #area2 = ellipse2.area - (afactor * 2 * intersect.area)
 
-        # variar porpocao com area de intersecao
-        # Ellipse area area = pi * a * b
+    # variar porpocao com area de intersecao
+    # Ellipse area area = pi * a * b
 
-        sy = sigmay
+    sy = sigmay
 
-        # a = area/(pi * b)
-        sx1 = area1 / (math.pi * sy)
-        #sx2 = area2 / (math.pi * sy)
+    # a = area/(pi * b)
+    #sx = area1 / (math.pi * sy)
+    sx = math.sqrt((area1 * PFACTOR)/math.pi)
 
-        sy = sx1 / PFACTOR
+    sy = sx / PFACTOR
 
-        return sx1, sy
+    return sx, sy
 
 
-def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
+def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY,):
 
     intersect = pspace_intersection(person1, person2, sigmax, sigmay)
 
     sx = sigmax
     sy = sigmay
 
-    while not intersect.is_empty:
-        (sx, sy) = parameters_computation(person1, person2, sx, sy)
+    #while intersect.area != 0:
 
-        intersect = pspace_intersection(person1, person2, sx, sy)
-        print(intersect.area)
+    (sx, sy) = parameters_computation(person1, person2, sx, sy)
+
+    intersect = pspace_intersection(person1, person2, sx, sy)
+
 
     return sx, sy
 
@@ -324,6 +321,7 @@ class SpaceModeling:
                     (sx, sy) = iterative_intersections(
                         persons[0], persons[1], sigmax=PSPACEX, sigmay=PSPACEY)
 
+
             # Groups with > 2 elements:
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
@@ -353,8 +351,17 @@ class SpaceModeling:
 
             for idx, person in enumerate(persons, start=1):
 
+                shapely_diff = 1
                 personal_space = draw_personalspace(
-                    person[0], person[1], person[2], ax, sx, sy, plot_kwargs, idx)
+                    person[0], person[1], person[2], ax, sx - shapely_diff, sy - shapely_diff,  plot_kwargs, idx)  # plot using ellipse.py functions
+
+                #el = create_shapely_ellipse(
+                #    (person[0], person[1]), (sx, sy), person[2])
+                #verts1 = np.array(el.exterior.coords.xy)
+                #patch1 = Polygon(verts1.T, color='blue', alpha=0.5)
+                #ax.add_patch(patch1)
+
+                # personal space ellipse generated by shapely
 
                 # Approaching Area filtering - remove points that are inside the personal space of a person
                 approaching_filter = approachingfiltering(
