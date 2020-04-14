@@ -135,7 +135,8 @@ class Space_Modeling:
 
 def main():
     if len(sys.argv)>1:
-        with open(sys.argv[1]) as fh:
+        file = "data/" + sys.argv[1]
+        with open(file) as fh:
 
             app = Space_Modeling(fh)
             app.solve()
