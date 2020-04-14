@@ -99,19 +99,13 @@ def group_radius(persons, group_pose):
     for i in range(len(persons)):
         # average of the distance between the group members and the center of the group, o-space radius
         sum_radius = sum_radius + \
-            euclidean_distance(
-                persons[i][0], persons[i][1], group_pose[0], group_pose[1])
+                     euclidean_distance(
+                         persons[i][0], persons[i][1], group_pose[0], group_pose[1])
     return sum_radius / len(persons)
 
 
-def ellipse_intersection(ellipse1, ellipse2):
-    """Checks if two ellipses intersect."""
-
-    return ellipse1.intersection(ellipse2)
-
-
 def pspace_intersection(person1, person2, sigmax, sigmay):
-    """ """
+    """Returns the intersection between two personal spaces."""
 
     ellipse1 = create_shapely_ellipse(
         (person1[0], person1[1]), (sigmax, sigmay), person1[2])
@@ -120,7 +114,7 @@ def pspace_intersection(person1, person2, sigmax, sigmay):
     ellipse2 = create_shapely_ellipse(
         (person2[0], person2[1]), (sigmax, sigmay), person2[2])
 
-    return ellipse_intersection(ellipse1, ellipse2)
+    return ellipse1.intersection(ellipse2)
 
 
 def create_shapely_ellipse(center, lengths, angle=0):
@@ -135,7 +129,7 @@ def create_shapely_ellipse(center, lengths, angle=0):
     return ellr
 
 
-def minimimum_personalspace(sx, sy):
+def minimum_personalspace(sx, sy):
     """Checks if the parameters are at least the human body dimensions."""
     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
         sy = HUMAN_Y / 2
@@ -155,11 +149,11 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     ellipse2 = create_shapely_ellipse(
         (person2[0], person2[1]), (sigmax, sigmay), person2[2])
 
-    intersect = ellipse_intersection(ellipse1, ellipse2)
+    intersect = ellipse1.intersection(ellipse2)
 
     # Maneira 2
     diff_angles = abs(person1[2] - person2[2])
-###########CORRIGIR#########################
+    ###########CORRIGIR#########################
     # If the members of the group have the same orientation
     if diff_angles == round(0):
 
@@ -173,45 +167,44 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         co = abs(px2 - px1)
         angle = math.sin(co / hip)  # nao esta bem
 
-        afactor = ((angle / (2 * math.pi)) + INCREMENT)**2
+        afactor = ((angle / (2 * math.pi)) + INCREMENT) ** 2
 
-##############################################
+    ##############################################
     else:
         # Generates a weight between 1 and 2 based on the difference of the angles
         # INCREMENT = 1
 
         # Squared
-        #afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
+        # afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
 
         # Linear
         afactor = (diff_angles / (2 * math.pi)) + INCREMENT
 
         # Exponential
-        #afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
+        # afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
 
         # Logarithmic
-        #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
+        # afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
 
-    #afactor = 1
+    # afactor = 1
     # vezes 2 ou nao adicionar configuracao iterativamente
     area1 = ellipse1.area - (afactor * 1 * intersect.area)
-    #area2 = ellipse2.area - (afactor * 2 * intersect.area)
+    # area2 = ellipse2.area - (afactor * 2 * intersect.area)
 
     # variar porpocao com area de intersecao
     # Ellipse area area = pi * a * b
 
-    sy = sigmay
-
     # a = area/(pi * b)
-    #sx = area1 / (math.pi * sy)
-    sx = math.sqrt((area1 * PFACTOR)/math.pi)
+    # sx = area1 / (math.pi * sy)
+    sx = math.sqrt((area1 * PFACTOR) / math.pi)
 
     sy = sx / PFACTOR
 
     return sx, sy
 
 
-def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY,):
+def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY, ):
+    """Computes the parameters to avoid personal space overlapping between two persons."""
 
     intersect = pspace_intersection(person1, person2, sigmax, sigmay)
 
@@ -219,11 +212,9 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY,):
     sy = sigmay
 
     while intersect.area != 0:
-
         (sx, sy) = parameters_computation(person1, person2, sx, sy)
 
         intersect = pspace_intersection(person1, person2, sx, sy)
-
 
     return sx, sy
 
@@ -231,7 +222,7 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY,):
 class SpaceModeling:
 
     def __init__(self, fh):
-        """ Models the personal space, group space and estimates the possibles approaching areas"""
+        """Models the personal space, group space and estimates the possibles approaching areas."""
 
         # Lists Initialization
 
@@ -269,7 +260,7 @@ class SpaceModeling:
             self.group_radius.append(radius)
 
     def solve(self):
-        """ """
+        """ Estimates the personal space and group space."""
         f, ax = plt.subplots(1)
 
         # Iterate over groups
@@ -321,7 +312,6 @@ class SpaceModeling:
                     (sx, sy) = iterative_intersections(
                         persons[0], persons[1], sigmax=PSPACEX, sigmay=PSPACEY)
 
-
             # Groups with > 2 elements:
             else:  # The typical arragement  of a group of more than 2 persons is tipically circular
 
@@ -342,7 +332,7 @@ class SpaceModeling:
                 sy = PSPACEY
             else:
                 # Check if the parameters are less then human dimensions
-                (sx, sy) = minimimum_personalspace(sx, sy)
+                (sx, sy) = minimum_personalspace(sx, sy)
 
             # Possible approaching area computation and personal space ploting
             plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
@@ -350,18 +340,17 @@ class SpaceModeling:
             approaching_filter = approaching_area
 
             for idx, person in enumerate(persons, start=1):
+                shapely_diff = 1  # Error between python modules used
 
-                shapely_diff = 1
                 personal_space = draw_personalspace(
-                    person[0], person[1], person[2], ax, sx - shapely_diff, sy - shapely_diff,  plot_kwargs, idx)  # plot using ellipse.py functions
-
-                #el = create_shapely_ellipse(
-                #    (person[0], person[1]), (sx, sy), person[2])
-                #verts1 = np.array(el.exterior.coords.xy)
-                #patch1 = Polygon(verts1.T, color='blue', alpha=0.5)
-                #ax.add_patch(patch1)
-
+                    person[0], person[1], person[2], ax, sx - shapely_diff, sy - shapely_diff, plot_kwargs,
+                    idx)  # plot using ellipse.py functions
                 # personal space ellipse generated by shapely
+                # el = create_shapely_ellipse(
+                #    (person[0], person[1]), (sx, sy), person[2])
+                # verts1 = np.array(el.exterior.coords.xy)
+                # patch1 = Polygon(verts1.T, color='blue', alpha=0.5)
+                # ax.add_patch(patch1)
 
                 # Approaching Area filtering - remove points that are inside the personal space of a person
                 approaching_filter = approachingfiltering(
