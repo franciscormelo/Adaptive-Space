@@ -1,10 +1,50 @@
-# Source: https://stackoverflow.com/questions/28342968/how-to-plot-a-2d-gaussian-with-different-sigma
+# Adapted from: https://stackoverflow.com/questions/28342968/how-to-plot-a-2d-gaussian-with-different-sigma
 
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import math
+from ellipse import *
+
+# CONSTANTS
+# Human Body Dimensions top view in cm
+HUMAN_Y = 62.5
+HUMAN_X = 37.5
+
+
+def plot_person(x, y, angle, ax, plot_kwargs):
+    r = 10  # or whatever fits you
+    ax.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
+             head_length=1, head_width=1, shape='full', color='blue')
+
+    ax.plot(x, y, 'bo', markersize=8)
+
+    top_y = HUMAN_Y / 2
+    top_x = HUMAN_X / 2
+    plot_ellipse(semimaj=top_x, semimin=top_y,
+                 phi=angle, x_cent=x, y_cent=y, ax=ax)
+
+
+def plot_group(group_pose, group_radius, ax):
+
+    # O Space Modeling
+    ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
+    plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
+    plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=group_radius - HUMAN_X / 2, x_cent=group_pose[0],
+                 y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
+
+    # P Space Modeling
+    plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=group_radius + HUMAN_X / 2, x_cent=group_pose[0],
+                 y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
+
+    # approaching circle area
+    plot_kwargs = {'color': 'c', 'linestyle': ':', 'linewidth': 2}
+    plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
+                 y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
+    approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
+                                    y_cent=group_pose[1], data_out=True)
+
 
 def multivariate_gaussian(pos, mu, Sigma):
     """Return the multivariate Gaussian distribution on array pos."""
@@ -12,88 +52,105 @@ def multivariate_gaussian(pos, mu, Sigma):
     n = mu.shape[0]
     Sigma_det = np.linalg.det(Sigma)
     Sigma_inv = np.linalg.inv(Sigma)
-    N = np.sqrt((2*np.pi)**n * Sigma_det)
+    N = np.sqrt((2 * np.pi)**n * Sigma_det)
     # This einsum call calculates (x-mu)T.Sigma-1.(x-mu) in a vectorized
     # way across all the input variables.
-    fac = np.einsum('...k,kl,...l->...', pos-mu, Sigma_inv, pos-mu)
+    fac = np.einsum('...k,kl,...l->...', pos - mu, Sigma_inv, pos - mu)
 
     return np.exp(-fac / 2) / N
 
-def params_conversion(sx, sy, angle):
-    " Converts ellipses parameteres to Covarince matrix based on the orientation."
 
-    R = np.matrix([[math.cos(angle),-math.sin(angle)],[math.sin(angle),math.cos(angle)]])
-    S = np.matrix([[sx/2 , 0.],[0. ,sy/2]])
+def params_conversion(sx, sy, angle):
+    """ Converts ellipses parameteres to Covarince matrix based on the orientation."""
+    # https://www.visiondummy.com/2014/04/geometric-interpretation-covariance-matrix/
+
+    R = np.matrix([[math.cos(angle), -math.sin(angle)],
+                   [math.sin(angle), math.cos(angle)]])
+    S = np.matrix([[sx / 2, 0.], [0., sy / 2]])
     T = R * S
     covariance = T * T.transpose()
     return covariance
 
-# Our 2-dimensional distribution will be over variables X and Y
-#N = 40
-N = 200
-X = np.linspace(-10, 10, N)
-Y = np.linspace(-10, 10, N)
-X, Y = np.meshgrid(X, Y)
 
-# Mean vector and covariance matrix
-mu = np.array([0., 0.])
-#Sigma = np.array([[ 1. , -0.5], [-0.5,  1.]])
-#Sigma = np.array([[ 1. , 0.], [0.,  1.]])
+def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True, xmin=-1000, xmax=1000, ymin=-1000, ymax=1000, A=1):
+    """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
 
-covariance = params_conversion(1,2,1)
-Sigma = covariance
+    xmin = group_pos[0] - 200
+    xmax = group_pos[0] + 200
+    ymin = group_pos[1] - 200
+    ymax = group_pos[1] + 200
 
+    X = np.linspace(xmin, xmax, N)
+    Y = np.linspace(ymin, ymax, N)
+    X, Y = np.meshgrid(X, Y)
 
-# Pack X and Y into a single 3-dimensional array
-pos = np.empty(X.shape + (2,))
-pos[:, :, 0] = X
-pos[:, :, 1] = Y
+    # Pack X and Y into a single 3-dimensional array
+    pos = np.empty(X.shape + (2,))
+    pos[:, :, 0] = X
+    pos[:, :, 1] = Y
 
+    Z = np.empty([N, N])
 
-# The distribution on the variables X, Y packed into pos.
-Z = multivariate_gaussian(pos, mu, Sigma)
+    # plot using subplots
+    fig = plt.figure()
+    ax1 = fig.add_subplot(2, 1, 1, projection='3d')
+    #normalize = cm.colors.Normalize(vmin=0, vmax=1)
+    #norm = normalize
 
-# plot using subplots
-fig = plt.figure()
-ax1 = fig.add_subplot(2,1,1,projection='3d')
+    #ax2 = fig.add_subplot(2,1,2,projection='3d')
+    ax2 = fig.add_subplot(2, 1, 2)
 
-mu = np.array([5., 5.])
-Z1= multivariate_gaussian(pos, mu, Sigma)
-#normalize = cm.colors.Normalize(vmin=0, vmax=1)
-#norm = normalize
-Z = Z + Z1
+    plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
+    # Personal Space as gaussian for each person in the group
+    for person in persons:
+        Z1 = None
+        mu = np.array([person[0], person[1]])
+        Sigma = params_conversion(
+            ellipse_param[0], ellipse_param[1], person[2])
 
-surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0, antialiased=False,
-                cmap=cm.coolwarm)
+        # The distribution on the variables X, Y packed into pos.
+        Z1 = A * multivariate_gaussian(pos, mu, Sigma)
+        Z = Z + Z1
 
+        plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
-ax1.view_init(55,-70)
-ax1.set_xticks([])
-ax1.set_yticks([])
-ax1.set_zticks([])
-ax1.set_xlabel(r'$x$')
-ax1.set_ylabel(r'$y$')
-#fig.colorbar(surf, shrink=0.5, aspect=5)
+    if show_group_space:
+        Z1 = None
+        mu = np.array([group_pos[0], group_pos[1]])
+        Sigma = params_conversion(
+            group_radius, group_radius, 0)
+        Z1 = A * multivariate_gaussian(pos, mu, Sigma)
+        Z = Z + Z1
 
-#ax2 = fig.add_subplot(2,1,2,projection='3d')
-ax2 = fig.add_subplot(2,1,2)
+        plot_group(group_pos, group_radius, ax2)
 
-#ax2.contourf(X, Y, Z, zdir='z', offset=0, cmap=cm.viridis) #fills contour lines
-ax2.contour(X, Y, Z, zdir='z', offset=0, cmap=cm.viridis,linewidths=0.8)
+    # surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0, antialiased=False,
+    #    cmap=cm.coolwarm)
+    ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0,
+                     antialiased=False, cmap=cm.coolwarm)
 
+    ax1.view_init(55, -70)
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    ax1.set_zticks([])
+    ax1.set_xlabel(r'$x$')
+    ax1.set_ylabel(r'$y$')
+    #fig.colorbar(surf, shrink=0.5, aspect=5)
 
+    # ax2.contourf(X, Y, Z, zdir='z', offset=0, cmap=cm.viridis) #fills contour lines
+    ax2.contour(X, Y, Z, cmap=cm.viridis, linewidths=0.8)
 
-#ax2.view_init(90, 270)
+    #ax2.view_init(90, 270)
 
-#ax2.grid(False)
-#ax2.set_xticks([])
-#ax2.set_yticks([])
-#ax2.set_zticks([])
-ax2.set_xlabel(r'$x$')
-ax2.set_ylabel(r'$y$')
+    # ax2.grid(False)
+    # ax2.set_xticks([])
+    # ax2.set_yticks([])
+    # ax2.set_zticks([])
+    ax2.set_xlabel(r'$x$')
+    ax2.set_ylabel(r'$y$')
 
-
-plt.show(block=False)
-print("==================================================")
-input("Hit Enter To Close... ")
-plt.close()
+    plt.show(block=False)
+    print("==================================================")
+    input("Hit Enter To Close... ")
+    plt.clf()
+    plt.close()

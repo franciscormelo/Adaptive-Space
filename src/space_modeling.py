@@ -15,6 +15,8 @@ from matplotlib.patches import Polygon
 from shapely import affinity
 from typing import Any, Union
 
+from gaussian_modeling import plot_gaussians
+
 SHOW_PLOT = True
 
 # CONSTANTS
@@ -197,7 +199,6 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     # a = area/(pi * b)
     # sx = area1 / (math.pi * sy)
 
-
     #area  = pi * a * b
     # b = a /PFACTOR
     # area = pi * a * a/PFACTOR
@@ -343,7 +344,7 @@ class SpaceModeling:
                 (sx, sy) = minimum_personalspace(sx, sy)
 
             # Stores the parameters of the personal space
-            self.pspace_param[k] = (sx,sy)
+            self.pspace_param[k] = (sx, sy)
 
             # Possible approaching area computation and personal space ploting
             plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
@@ -389,13 +390,14 @@ class SpaceModeling:
             plt.show(block=False)
             print("==================================================")
             input("Hit Enter To Close... ")
-            plt.close()
+        plt.close()
 
     def write_params(self, fw):
         "Writes in a file the parameters of the personal space for each group."
         fw.write("(Sx,Sy)\n")
         for i in range(len(self.pspace_param)):
-            fw.write("("+ str(self.pspace_param[i][0])+ "," + str(self.pspace_param[i][1]) + ")\n")
+            fw.write(
+                "(" + str(self.pspace_param[i][0]) + "," + str(self.pspace_param[i][1]) + ")\n")
         pass
 
 
@@ -406,13 +408,30 @@ def main():
             app = SpaceModeling(fh)
             app.solve()
 
-
             fh.close()
 
         # Writes the parameters of the personal space for each group
         wfile = open("data/pspace_parameters.txt", "w+")
         app.write_params(wfile)
         wfile.close()
+
+        run = True
+        while run:
+            option = input(
+                "Do you want to visualize the surface and contour of the gaussians? \n 1 - Yes\n 2 - No\n Option: ")
+            option = int(option)
+
+            if option == 1:
+                number = input("Choose a group: ")
+                number = int(number)
+                idx = number - 1
+
+                plot_gaussians(app.persons[idx], app.group_pose[idx],
+                               app.group_radius[idx], app.pspace_param[idx])
+
+            else:
+                run = False
+
     else:
         print("Usage: %s <filename>" % (sys.argv[0]))
 
