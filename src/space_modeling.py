@@ -196,6 +196,11 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
     # a = area/(pi * b)
     # sx = area1 / (math.pi * sy)
+
+
+    #area  = pi * a * b
+    # b = a /PFACTOR
+    # area = pi * a * a/PFACTOR
     sx = math.sqrt((area1 * PFACTOR) / math.pi)
 
     sy = sx / PFACTOR
@@ -400,7 +405,7 @@ def main():
         with open(file) as fh:
             app = SpaceModeling(fh)
             app.solve()
-            
+
 
             fh.close()
 
