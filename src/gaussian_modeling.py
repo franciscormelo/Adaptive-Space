@@ -6,6 +6,7 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import math
 from ellipse import *
+from sklearn.preprocessing import normalize
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -14,6 +15,7 @@ HUMAN_X = 37.5
 
 
 def plot_person(x, y, angle, ax, plot_kwargs):
+    """ Plots a person from a top view."""
     r = 10  # or whatever fits you
     ax.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
              head_length=1, head_width=1, shape='full', color='blue')
@@ -27,7 +29,7 @@ def plot_person(x, y, angle, ax, plot_kwargs):
 
 
 def plot_group(group_pose, group_radius, ax):
-
+    """Plots the group o space, p space and approaching circle area. """
     # O Space Modeling
     ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
     plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
@@ -69,16 +71,20 @@ def params_conversion(sx, sy, angle):
     S = np.matrix([[sx / 2, 0.], [0., sy / 2]])
     T = R * S
     covariance = T * T.transpose()
+
     return covariance
 
 
 def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True, xmin=-1000, xmax=1000, ymin=-1000, ymax=1000, A=1):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
 
-    xmin = group_pos[0] - 200
-    xmax = group_pos[0] + 200
-    ymin = group_pos[1] - 200
-    ymax = group_pos[1] + 200
+    x = [item[0] for item in persons]
+    y = [item[1] for item in persons]
+
+    xmin = min(x) - 100
+    xmax = max(x) + 100
+    ymin = min(y) - 100
+    ymax = max(y)+ 100
 
     X = np.linspace(xmin, xmax, N)
     Y = np.linspace(ymin, ymax, N)
@@ -110,35 +116,40 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
         # The distribution on the variables X, Y packed into pos.
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
+
         Z = Z + Z1
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
+
+
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
-        Sigma = params_conversion(
-            group_radius, group_radius, 0)
+
+        Sigma = params_conversion(group_radius, group_radius, 0)
+
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
+
         Z = Z + Z1
 
         plot_group(group_pos, group_radius, ax2)
 
     # surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0, antialiased=False,
     #    cmap=cm.coolwarm)
-    ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0,
-                     antialiased=False, cmap=cm.coolwarm)
+    surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0,
+                     antialiased=False, cmap="jet")
 
     ax1.view_init(55, -70)
-    ax1.set_xticks([])
-    ax1.set_yticks([])
+    #ax1.set_xticks([])
+    #ax1.set_yticks([])
     ax1.set_zticks([])
     ax1.set_xlabel(r'$x$')
     ax1.set_ylabel(r'$y$')
     #fig.colorbar(surf, shrink=0.5, aspect=5)
 
     # ax2.contourf(X, Y, Z, zdir='z', offset=0, cmap=cm.viridis) #fills contour lines
-    ax2.contour(X, Y, Z, cmap=cm.viridis, linewidths=0.8)
+    ax2.contour(X, Y, Z, cmap="hsv", linewidths=0.8, levels = 9)
 
     #ax2.view_init(90, 270)
 
