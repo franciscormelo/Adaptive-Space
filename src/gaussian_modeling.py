@@ -16,6 +16,8 @@ from scipy.stats import multivariate_normal
 HUMAN_Y = 62.5
 HUMAN_X = 37.5
 
+BACK_FACTOR = 1.5
+
 
 def plot_person(x, y, angle, ax, plot_kwargs):
     """ Plots a person from a top view."""
@@ -64,6 +66,51 @@ def multivariate_gaussian(pos, mu, Sigma):
     fac = np.einsum('...k,kl,...l->...', pos - mu, Sigma_inv, pos - mu)
 
     return np.exp(-fac / 2) / N
+
+
+def assymetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
+    """ """
+    Z1 = np.zeros([N, N])
+    Z2 = np.zeros([N, N])
+    angle = orientation + math.pi / 2
+
+    if abs(angle) == math.pi / 2:
+        cond1 = pos[:, :, 0] >= center[0]
+        pos1 = pos[:, :][cond1]
+        Z1[cond1] = multivariate_gaussian(pos1, mu, Sigma)
+
+        cond2 = pos[:, :, 0] < center[0]
+        pos2 = pos[:, :][cond2]
+        Z2[cond2] = multivariate_gaussian(pos2, mu, Sigma_back)
+
+    elif angle == 0 or abs(angle) == math.pi:
+        cond1 = pos[:, :, 1] >= center[1]
+        pos1 = pos[:, :][cond1]
+        Z1[cond1] = multivariate_gaussian(pos1, mu, Sigma)
+
+        cond2 = pos[:, :, 1] < center[1]
+        pos2 = pos[:, :][cond2]
+        Z2[cond2] = multivariate_gaussian(pos2, mu, Sigma_back)
+
+    else:
+        a = math.tan(angle)
+        b = center[1] - (a * center[0])
+
+        cond1 = pos[:, :, 1] >= (a * center[0]) + b
+        pos1 = pos[:, :][cond1]
+        Z1[cond1] = multivariate_gaussian(pos1, mu, Sigma)
+
+        cond2 = pos[:, :, 1] < (a * center[0]) + b
+        pos2 = pos[:, :][cond2]
+        Z2[cond2] = multivariate_gaussian(pos2, mu, Sigma_back)
+
+    # Normalization
+    A1 = 1 / Z1.max()
+    Z1 = A1 * Z1
+
+    A2 = 1 / Z2.max()
+    Z2 = A2 * Z2
+    return Z1 + Z2
 
 
 def params_conversion(sx, sy, angle):
@@ -116,10 +163,14 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         Sigma = params_conversion(
             ellipse_param[0], ellipse_param[1], person[2])
 
+        Sigma_back = params_conversion(
+            ellipse_param[0] / BACK_FACTOR, ellipse_param[1], person[2])
+
         # The distribution on the variables X, Y packed into pos.
-        Zg = multivariate_gaussian(pos, mu, Sigma)
-        A = 1 / Zg.max()
-        Z1 = A * Zg
+        #Zg = multivariate_gaussian(pos, mu, Sigma)
+        Z1 = assymetric_gaussian(
+            pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
+
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         #Z = Z1
         Z = Z + Z1
