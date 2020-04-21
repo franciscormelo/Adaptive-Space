@@ -14,6 +14,7 @@ from shapely.geometry.point import Point
 from matplotlib.patches import Polygon
 from shapely import affinity
 from typing import Any, Union
+from matplotlib import rc
 
 from gaussian_modeling import plot_gaussians
 
@@ -155,7 +156,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
     # Maneira 2
     diff_angles = abs(person1[2] - person2[2])
-    ###########CORRIGIR#########################
+
     # If the members of the group have the same orientation
     if diff_angles == round(0):
 
@@ -169,32 +170,32 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         co = abs(px2 - px1)
         angle = math.sin(co / hip)  # nao esta bem
 
+        #dis = euclidean_distance(person1[0], person1[1],person2[0], person2[1])
         afactor = ((angle / (2 * math.pi)) + INCREMENT) ** 2
 
+        # o que varias entre duas pessoas com mesma orientacao é sua distancia
+        # heuristica nesse caso deve ser a distancia entre estes apenas?
+        # o que acontece se tiver translacao em x e y
     ##############################################
     else:
         # Generates a weight between 1 and 2 based on the difference of the angles
         # INCREMENT = 1
 
         # Squared
-        afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
+        #afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
 
         # Linear
-        #afactor = (diff_angles / (2 * math.pi)) + INCREMENT
+        afactor = (diff_angles / (2 * math.pi)) + INCREMENT
 
         # Exponential
         # afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
 
         # Logarithmic
-        # afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
+        #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
 
-    # afactor = 1
-    # vezes 2 ou nao adicionar configuracao iterativamente
     area1 = ellipse1.area - (afactor * 1 * intersect.area)
-    # area2 = ellipse2.area - (afactor * 2 * intersect.area)
 
-    # variar porpocao com area de intersecao
-    # Ellipse area area = pi * a * b
+    # Ellipse area = pi * a * b
 
     # a = area/(pi * b)
     # sx = area1 / (math.pi * sy)
@@ -352,11 +353,11 @@ class SpaceModeling:
             approaching_filter = approaching_area
 
             for idx, person in enumerate(persons, start=1):
-                shapely_diff = 0.8  # Error between python modules used
-
+                shapely_diff_sy = 0.5  # Error between python modules used
+                shapely_diff_sx = 1
                 personal_space = draw_personalspace(
                     person[0], person[1], person[2], ax, sx -
-                    shapely_diff, sy - shapely_diff, plot_kwargs,
+                    shapely_diff_sx, sy - shapely_diff_sy, plot_kwargs,
                     idx)  # plot using ellipse.py functions
 
                 # Approaching Area filtering - remove points that are inside the personal space of a person
@@ -391,7 +392,6 @@ class SpaceModeling:
         for i in range(len(self.pspace_param)):
             fw.write(
                 "(" + str(self.pspace_param[i][0]) + "," + str(self.pspace_param[i][1]) + ")\n")
-        pass
 
 
 def main():
@@ -420,7 +420,8 @@ def main():
             if option == 1:
 
                 try:
-                    number = int(input("Choose a group to plot from 1 to " + str(len(app.group_nb)) +" : "))
+                    number = int(
+                        input("Choose a group to plot from 1 to " + str(len(app.group_nb)) + " : "))
                 except ValueError:
                     print("Invalid group number.")
                     print()

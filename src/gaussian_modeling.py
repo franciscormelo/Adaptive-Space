@@ -7,6 +7,9 @@ from mpl_toolkits.mplot3d import Axes3D
 import math
 from ellipse import *
 from sklearn.preprocessing import normalize
+from matplotlib import rc
+
+from scipy.stats import multivariate_normal
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -50,13 +53,14 @@ def plot_group(group_pose, group_radius, ax):
 
 def multivariate_gaussian(pos, mu, Sigma):
     """Return the multivariate Gaussian distribution on array pos."""
-
-    n = mu.shape[0]
+    # https://scipython.com/blog/visualizing-the-bivariate-gaussian-distribution/
+    n = mu.shape[0]  # Dimension
     Sigma_det = np.linalg.det(Sigma)
     Sigma_inv = np.linalg.inv(Sigma)
     N = np.sqrt((2 * np.pi)**n * Sigma_det)
     # This einsum call calculates (x-mu)T.Sigma-1.(x-mu) in a vectorized
     # way across all the input variables.
+
     fac = np.einsum('...k,kl,...l->...', pos - mu, Sigma_inv, pos - mu)
 
     return np.exp(-fac / 2) / N
@@ -75,16 +79,16 @@ def params_conversion(sx, sy, angle):
     return covariance
 
 
-def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True, xmin=-1000, xmax=1000, ymin=-1000, ymax=1000, A=1):
+def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
-
+    A = 1
     x = [item[0] for item in persons]
     y = [item[1] for item in persons]
 
     xmin = min(x) - 100
     xmax = max(x) + 100
     ymin = min(y) - 100
-    ymax = max(y)+ 100
+    ymax = max(y) + 100
 
     X = np.linspace(xmin, xmax, N)
     Y = np.linspace(ymin, ymax, N)
@@ -99,12 +103,10 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
     # plot using subplots
     fig = plt.figure()
-    ax1 = fig.add_subplot(2, 1, 1, projection='3d')
-    #normalize = cm.colors.Normalize(vmin=0, vmax=1)
-    #norm = normalize
 
-    #ax2 = fig.add_subplot(2,1,2,projection='3d')
-    ax2 = fig.add_subplot(2, 1, 2)
+    ax1 = fig.add_subplot(1, 2, 2, projection='3d')
+
+    ax2 = fig.add_subplot(1, 2, 1)
 
     plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
     # Personal Space as gaussian for each person in the group
@@ -115,14 +117,16 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
             ellipse_param[0], ellipse_param[1], person[2])
 
         # The distribution on the variables X, Y packed into pos.
-        Z1 = A * multivariate_gaussian(pos, mu, Sigma)
-
+        Zg = multivariate_gaussian(pos, mu, Sigma)
+        A = 1 / Zg.max()
+        Z1 = A * Zg
+        #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
+        #Z = Z1
         Z = Z + Z1
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
-
-
+    show_group_space = False
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
@@ -130,36 +134,23 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         Sigma = params_conversion(group_radius, group_radius, 0)
 
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
-
+        #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         Z = Z + Z1
 
         plot_group(group_pos, group_radius, ax2)
 
-    # surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0, antialiased=False,
-    #    cmap=cm.coolwarm)
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0,
-                     antialiased=False, cmap="jet")
+                            antialiased=False, cmap="jet")
 
-    ax1.view_init(55, -70)
-    #ax1.set_xticks([])
-    #ax1.set_yticks([])
-    ax1.set_zticks([])
-    ax1.set_xlabel(r'$x$')
-    ax1.set_ylabel(r'$y$')
-    #fig.colorbar(surf, shrink=0.5, aspect=5)
+    ax1.set_xlabel(r'$x (cm)$')
+    ax1.set_ylabel(r'$y (cm)$')
+    ax1.set_zlabel(r'$Cost$')
 
-    # ax2.contourf(X, Y, Z, zdir='z', offset=0, cmap=cm.viridis) #fills contour lines
-    ax2.contour(X, Y, Z, cmap="hsv", linewidths=0.8, levels = 9)
+    ax2.contour(X, Y, Z, cmap="hsv", linewidths=0.8, levels=9)
 
-    #ax2.view_init(90, 270)
-
-    # ax2.grid(False)
-    # ax2.set_xticks([])
-    # ax2.set_yticks([])
-    # ax2.set_zticks([])
-    ax2.set_xlabel(r'$x$')
-    ax2.set_ylabel(r'$y$')
-
+    ax2.set_xlabel(r'$x (cm)$')
+    ax2.set_ylabel(r'$y (cm)$')
+    fig.tight_layout()
     plt.show(block=False)
     print("==================================================")
     input("Hit Enter To Close... ")
