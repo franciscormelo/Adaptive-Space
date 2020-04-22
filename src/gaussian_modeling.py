@@ -16,7 +16,7 @@ from scipy.stats import multivariate_normal
 HUMAN_Y = 62.5
 HUMAN_X = 37.5
 
-BACK_FACTOR = 1.5
+BACK_FACTOR = 1.3
 
 
 def plot_person(x, y, angle, ax, plot_kwargs):
@@ -74,35 +74,23 @@ def assymetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
     Z2 = np.zeros([N, N])
     angle = orientation + math.pi / 2
 
-    if abs(angle) == math.pi / 2:
-        cond1 = pos[:, :, 0] >= center[0]
-        pos1 = pos[:, :][cond1]
-        Z1[cond1] = multivariate_gaussian(pos1, mu, Sigma)
+    # # Based on Kirby phd thesis
+    cond = np.arctan2(pos[:, :, 1] - center[1], pos[:, :,
+                                                    0] - center[0]) - orientation + (math.pi / 2)
 
-        cond2 = pos[:, :, 0] < center[0]
-        pos2 = pos[:, :][cond2]
-        Z2[cond2] = multivariate_gaussian(pos2, mu, Sigma_back)
+    # Front gaussian
+    #aux1 = (cond + np.pi) % (2 * np.pi) - np.pi > 0
+    # Compute the nor- malized angle of the line
+    aux1 = np.arctan2(np.sin(cond), np.cos(cond)) > 0
+    pos1 = pos[:, :][aux1]
+    Z1[aux1] = multivariate_gaussian(pos1, mu, Sigma)
 
-    elif angle == 0 or abs(angle) == math.pi:
-        cond1 = pos[:, :, 1] >= center[1]
-        pos1 = pos[:, :][cond1]
-        Z1[cond1] = multivariate_gaussian(pos1, mu, Sigma)
-
-        cond2 = pos[:, :, 1] < center[1]
-        pos2 = pos[:, :][cond2]
-        Z2[cond2] = multivariate_gaussian(pos2, mu, Sigma_back)
-
-    else:
-        a = math.tan(angle)
-        b = center[1] - (a * center[0])
-
-        cond1 = pos[:, :, 1] >= (a * center[0]) + b
-        pos1 = pos[:, :][cond1]
-        Z1[cond1] = multivariate_gaussian(pos1, mu, Sigma)
-
-        cond2 = pos[:, :, 1] < (a * center[0]) + b
-        pos2 = pos[:, :][cond2]
-        Z2[cond2] = multivariate_gaussian(pos2, mu, Sigma_back)
+    # Back Gaussian
+    #aux2 = (cond + np.pi) % (2 * np.pi) - np.pi <= 0
+    # Compute the nor- malized angle of the line
+    aux2 = np.arctan2(np.sin(cond), np.cos(cond)) <= 0
+    pos2 = pos[:, :][aux2]
+    Z2[aux2] = multivariate_gaussian(pos2, mu, Sigma_back)
 
     # Normalization
     A1 = 1 / Z1.max()
@@ -185,7 +173,11 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         Sigma = params_conversion(group_radius, group_radius, 0)
 
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
-        #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
+        Z1 = multivariate_normal(mu, Sigma).pdf(pos)
+        # Normalization
+
+        A1 = 0.5 / Z1.max()
+        Z1 = A1 * Z1
         Z = Z + Z1
 
         plot_group(group_pos, group_radius, ax2)
@@ -205,5 +197,6 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     plt.show(block=False)
     print("==================================================")
     input("Hit Enter To Close... ")
+    surf.remove()
     plt.clf()
     plt.close()
