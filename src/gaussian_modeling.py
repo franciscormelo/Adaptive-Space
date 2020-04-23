@@ -1,5 +1,12 @@
-# Adapted from: https://stackoverflow.com/questions/28342968/how-to-plot-a-2d-gaussian-with-different-sigma
-
+#! /usr/bin/env python3
+'''
+    File name: gaussian_modeling.py
+    Author: Francisco Melo
+    Mail: francisco.raposo.melo@tecnico.ulisboa.pt
+    Date created: X/XX/XXXX
+    Date last modified: X/XX/XXXX
+    Python Version: 3.7
+'''
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -55,6 +62,7 @@ def plot_group(group_pose, group_radius, ax):
 
 def multivariate_gaussian(pos, mu, Sigma):
     """Return the multivariate Gaussian distribution on array pos."""
+    # Adapted from: https://stackoverflow.com/questions/28342968/how-to-plot-a-2d-gaussian-with-different-sigma
     # https://scipython.com/blog/visualizing-the-bivariate-gaussian-distribution/
     n = mu.shape[0]  # Dimension
     Sigma_det = np.linalg.det(Sigma)
@@ -165,6 +173,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
+        plot_group(group_pos, group_radius, ax2)
     show_group_space = False
     if show_group_space:
         Z1 = None
@@ -176,11 +185,9 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         # Normalization
 
-        A1 = 0.5 / Z1.max()
+        A1 = 1 / Z1.max()
         Z1 = A1 * Z1
         Z = Z + Z1
-
-        plot_group(group_pos, group_radius, ax2)
 
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0,
                             antialiased=False, cmap="jet")
