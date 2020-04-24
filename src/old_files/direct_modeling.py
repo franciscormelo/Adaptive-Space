@@ -26,6 +26,7 @@ c2 = (4, 7)
 
 el_nb = 4
 fig, ax = plt.subplots()
+fig2 = plt.subplot()
 
 # these next few lines are pretty important because
 # otherwise your ellipses might only be displayed partly

@@ -58,6 +58,7 @@ def plot_group(group_pose, group_radius, ax):
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
     approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
                                     y_cent=group_pose[1], data_out=True)
+    return approaching_area
 
 
 def multivariate_gaussian(pos, mu, Sigma):
@@ -121,6 +122,19 @@ def params_conversion(sx, sy, angle):
 
     return covariance
 
+# def approachingfiltering_gaussian(Z,X, Y approaching_area):
+#     """Filters the approaching area."""
+#     # Approaching Area filtering - remove points tha are inside the personal space of a person
+#     if idx == 1:
+#         approaching_filter = [(x, y) for x, y in zip(
+#             approaching_filter[0], approaching_filter[1]) if not personal_space.contains_point([x, y])]
+#     else:
+#         cx = [j[0] for j in approaching_filter]
+#         cy = [k[1] for k in approaching_filter]
+#         approaching_filter = [(x, y) for x, y in zip(
+#             cx, cy) if not personal_space.contains_point([x, y])]
+#     return approaching_filter
+
 
 def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
@@ -153,6 +167,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
     plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
     # Personal Space as gaussian for each person in the group
+
     for person in persons:
         Z1 = None
         mu = np.array([person[0], person[1]])
@@ -173,7 +188,13 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
-        plot_group(group_pos, group_radius, ax2)
+    approaching_area = plot_group(group_pos, group_radius, ax2)
+    # # possible approaching positions
+    # approaching_x = [j[0] for j in approaching_filter]
+    # approaching_y = [k[1] for k in approaching_filter]
+    #
+    # ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
+
     show_group_space = False
     if show_group_space:
         Z1 = None
@@ -189,14 +210,15 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         Z1 = A1 * Z1
         Z = Z + Z1
 
-    surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=0,
+    surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=1,
                             antialiased=False, cmap="jet")
 
     ax1.set_xlabel(r'$x (cm)$')
     ax1.set_ylabel(r'$y (cm)$')
     ax1.set_zlabel(r'$Cost$')
 
-    ax2.contour(X, Y, Z, cmap="hsv", linewidths=0.8, levels=9)
+    CS = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
+    fig.colorbar(CS)
 
     ax2.set_xlabel(r'$x (cm)$')
     ax2.set_ylabel(r'$y (cm)$')
