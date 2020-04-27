@@ -377,7 +377,7 @@ class SpaceModeling:
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
         plt.savefig('destination_path.eps', format='eps')
-
+        ax.set_aspect(aspect=1)
         if SHOW_PLOT:
             plt.tight_layout()
             plt.show(block=False)

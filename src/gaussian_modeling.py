@@ -222,6 +222,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
     ax2.set_xlabel(r'$x (cm)$')
     ax2.set_ylabel(r'$y (cm)$')
+    ax2.set_aspect(aspect=1)
     fig.tight_layout()
     plt.show(block=False)
     print("==================================================")
