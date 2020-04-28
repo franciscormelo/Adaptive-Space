@@ -105,9 +105,8 @@ def group_radius(persons, group_pose):
     sum_radius = 0
     for i in range(len(persons)):
         # average of the distance between the group members and the center of the group, o-space radius
-        sum_radius = sum_radius + \
-            euclidean_distance(
-                persons[i][0], persons[i][1], group_pose[0], group_pose[1])
+        sum_radius +=  euclidean_distance(persons[i][0], persons[i][1], group_pose[0], group_pose[1])
+
     return sum_radius / len(persons)
 
 
@@ -234,7 +233,7 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 # Calculates the radius and center of the group o-space. The radius of the o-space is the distance from the center of
 # the o-space to the person closest to it and the center of the o-space is estimated based on the shared focal center
 # as it was done in GCFF
-def calc_o_space_radius(persons):
+def calc_o_space(persons):
     stride = 65
     c_x = 0
     c_y = 0
@@ -288,22 +287,24 @@ class SpaceModeling:
 
             self.persons[num] = tuple(self.persons[num])
 
-            # Saves the group center i.e. o space center
-            group_center = data[1].split(",")
-            self.group_pose.append(tuple([float(group_center[0][1:]), float(
-                group_center[1][:-1])]))  # o space center point
+            if file_type == 1:
 
+                # Saves the group center i.e. o space center
+                group_center = data[1].split(",")
+                self.group_pose.append(tuple([float(group_center[0][1:]), float(
+                    group_center[1][:-1])]))  # o space center point
+
+
+
+            #######
+            elif file_type == 2:
+                self.group_pose.append(tuple(calc_o_space(self.persons[num])))
+               
+                
             # computes group radius given the center of the o-space
             radius = group_radius(self.persons[num], self.group_pose[num])
             self.group_radius.append(radius)
-
-            #######
-            if file_type == 2:
-                est_pose = calc_o_space_radius(self.persons[num])
-                print("Original" + str(self.group_pose[num]) + " Radius = " + str(radius))
-                radius2 = group_radius(self.persons[num], est_pose)
-                print("Obtained" + str(est_pose) + " Radius = " + str(radius2))
-                print()
+    
 
     def solve(self):
         """ Estimates the personal space and group space."""
@@ -426,7 +427,7 @@ class SpaceModeling:
 
 
 def main():
-    if len(sys.argv) > 1 :
+    if len(sys.argv) > 1:
         file = "data/" + sys.argv[1]
 
         # 1 - Group inidivudals pose and o space center in input file.
