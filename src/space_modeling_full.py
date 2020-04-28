@@ -57,8 +57,8 @@ def rotate(px, py, angle):
     return qx, qy
 
 
-def draw_arrow(x, y, angle):  
-    """Draws an arrow given a pose. Angle in radians."""
+def draw_arrow(x, y, angle):  # angle in radians
+    """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
     plt.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
               head_length=1, head_width=1, shape='full', color='blue')
@@ -174,7 +174,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         co = abs(px2 - px1)
         angle = math.sin(co / hip)  # nao esta bem
 
-        #dis = euclidean_distance(person1[0], person1[1],person2[0], person2[1])
+        # dis = euclidean_distance(person1[0], person1[1],person2[0], person2[1])
         afactor = ((angle / (2 * math.pi)) + INCREMENT) ** 2
 
         # o que varias entre duas pessoas com mesma orientacao é sua distancia
@@ -186,7 +186,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         # INCREMENT = 1
 
         # Squared
-        #afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
+        # afactor = ((diff_angles**2) / (2 * math.pi)) + INCREMENT
 
         # Linear
         afactor = (diff_angles / (2 * math.pi)) + INCREMENT
@@ -195,7 +195,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         # afactor = (math.exp(diff_angles) / (2 * math.pi)) + INCREMENT
 
         # Logarithmic
-        #afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
+        # afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
 
     area1 = ellipse1.area - (afactor * 1 * intersect.area)
 
@@ -204,7 +204,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     # a = area/(pi * b)
     # sx = area1 / (math.pi * sy)
 
-    #area  = pi * a * b
+    # area  = pi * a * b
     # b = a /PFACTOR
     # area = pi * a * a/PFACTOR
     sx = math.sqrt((area1 * PFACTOR) / math.pi)
@@ -230,9 +230,33 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     return sx, sy
 
 
+#################################################################################################################
+# Calculates the radius and center of the group o-space. The radius of the o-space is the distance from the center of
+# the o-space to the person closest to it and the center of the o-space is estimated based on the shared focal center
+# as it was done in GCFF
+def calc_o_space_radius(persons):
+    stride = 65
+    c_x = 0
+    c_y = 0
+    o_sp_radius = 0
+
+    # Group size
+    g_size = len(persons)
+
+    for person in persons:
+        c_x += person[0] + np.cos(person[2]) * stride
+        c_y += person[1] + np.sin(person[2]) * stride
+
+    center = [c_x / g_size, c_y / g_size]
+
+    return center
+
+#################################################################################################################
+
+
 class SpaceModeling:
 
-    def __init__(self, fh):
+    def __init__(self, fh, file_type):
         """Models the personal space, group space and estimates the possibles approaching areas."""
 
         # Lists Initialization
@@ -272,6 +296,14 @@ class SpaceModeling:
             # computes group radius given the center of the o-space
             radius = group_radius(self.persons[num], self.group_pose[num])
             self.group_radius.append(radius)
+
+            #######
+            if file_type == 2:
+                est_pose = calc_o_space_radius(self.persons[num])
+                print("Original" + str(self.group_pose[num]) + " Radius = " + str(radius))
+                radius2 = group_radius(self.persons[num], est_pose)
+                print("Obtained" + str(est_pose) + " Radius = " + str(radius2))
+                print()
 
     def solve(self):
         """ Estimates the personal space and group space."""
@@ -394,10 +426,15 @@ class SpaceModeling:
 
 
 def main():
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 1 :
         file = "data/" + sys.argv[1]
+
+        # 1 - Group inidivudals pose and o space center in input file.
+        # 2 - Only group individuals pose in input file.
+        file_type = int(sys.argv[2])
+
         with open(file) as fh:
-            app = SpaceModeling(fh)
+            app = SpaceModeling(fh, file_type)
             app.solve()
 
             fh.close()

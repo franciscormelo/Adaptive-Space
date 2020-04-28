@@ -57,8 +57,8 @@ def rotate(px, py, angle):
     return qx, qy
 
 
-def draw_arrow(x, y, angle):  
-    """Draws an arrow given a pose. Angle in radians."""
+def draw_arrow(x, y, angle):  # angle in radians
+    """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
     plt.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
               head_length=1, head_width=1, shape='full', color='blue')
@@ -214,7 +214,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     return sx, sy
 
 
-def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
+def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY, ):
     """Computes the parameters to avoid personal space overlapping between two persons."""
 
     intersect = pspace_intersection(person1, person2, sigmax, sigmay)
