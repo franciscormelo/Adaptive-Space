@@ -105,7 +105,8 @@ def group_radius(persons, group_pose):
     sum_radius = 0
     for i in range(len(persons)):
         # average of the distance between the group members and the center of the group, o-space radius
-        sum_radius +=  euclidean_distance(persons[i][0], persons[i][1], group_pose[0], group_pose[1])
+        sum_radius += euclidean_distance(persons[i][0],
+                                         persons[i][1], group_pose[0], group_pose[1])
 
     return sum_radius / len(persons)
 
@@ -254,10 +255,9 @@ def calc_o_space(persons):
 
 
 class SpaceModeling:
+    """Models the personal space, group space and estimates the possibles approaching areas."""
 
     def __init__(self, fh, file_type):
-        """Models the personal space, group space and estimates the possibles approaching areas."""
-
         # Lists Initialization
 
         # split the file into lines
@@ -277,34 +277,33 @@ class SpaceModeling:
 
         for num, string in enumerate(file):
             data = string.split("--")
-            group = tuple(data[0].split(","))
+            group = data[0].split(",")
+
             self.group_nb.append(len(group))  # Numbers of members in a group
 
             for person in group:
-                pose = tuple(person.split(" "))
+                person_pose = person[person.find('['):person.find(']') + 1]
+
+                pose = tuple(person_pose.split(" "))
                 self.persons[num].append(
                     tuple([float(pose[0][1:]), float(pose[1]), float(pose[2][:-1])]))
 
             self.persons[num] = tuple(self.persons[num])
 
-            if file_type == 1:
+            if file_type == 1:  # Group o-space from file
 
                 # Saves the group center i.e. o space center
                 group_center = data[1].split(",")
                 self.group_pose.append(tuple([float(group_center[0][1:]), float(
                     group_center[1][:-1])]))  # o space center point
 
-
-
             #######
-            elif file_type == 2:
+            elif file_type == 2:  # No group o-space information
                 self.group_pose.append(tuple(calc_o_space(self.persons[num])))
-               
-                
+
             # computes group radius given the center of the o-space
             radius = group_radius(self.persons[num], self.group_pose[num])
             self.group_radius.append(radius)
-    
 
     def solve(self):
         """ Estimates the personal space and group space."""
