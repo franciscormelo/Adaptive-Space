@@ -33,6 +33,8 @@ HUMAN_X = 37.5
 PSPACEX = 80.0
 PSPACEY = 60.0
 
+STRIDE = 65
+
 # Porpotinal factor between pspace size in x and y axis
 PFACTOR = PSPACEX / PSPACEY
 
@@ -197,9 +199,14 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         # Logarithmic
         # afactor = (math.log2(diff_angles) / (2 * math.pi)) + INCREMENT
 
-    area1 = ellipse1.area - (afactor * 1 * intersect.area)
+    area = ellipse1.area - (afactor * 1 * intersect.area)
 
-    # Ellipse area = pi * a * b
+    if area >= 0:
+        area1 = area
+    else:
+        afactor = 1
+        area1 = ellipse1.area - (afactor * 1 * intersect.area)
+   # Ellipse area = pi * a * b
 
     # a = area/(pi * b)
     # sx = area1 / (math.pi * sy)
@@ -207,6 +214,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     # area  = pi * a * b
     # b = a /PFACTOR
     # area = pi * a * a/PFACTOR
+
     sx = math.sqrt((area1 * PFACTOR) / math.pi)
 
     sy = sx / PFACTOR
@@ -230,12 +238,8 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     return sx, sy
 
 
-#################################################################################################################
-# Calculates the radius and center of the group o-space. The radius of the o-space is the distance from the center of
-# the o-space to the person closest to it and the center of the o-space is estimated based on the shared focal center
-# as it was done in GCFF
 def calc_o_space(persons):
-    stride = 65
+    """ """
     c_x = 0
     c_y = 0
     o_sp_radius = 0
@@ -244,14 +248,56 @@ def calc_o_space(persons):
     g_size = len(persons)
 
     for person in persons:
-        c_x += person[0] + np.cos(person[2]) * stride
-        c_y += person[1] + np.sin(person[2]) * stride
+        c_x += person[0] + np.cos(person[2]) * STRIDE
+        c_y += person[1] + np.sin(person[2]) * STRIDE
 
     center = [c_x / g_size, c_y / g_size]
 
     return center
 
-#################################################################################################################
+
+def plot_group(group_pose, group_radius, ax, persons, sx, sy):
+    """ """
+    # O Space Modeling
+    ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
+    plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
+    plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=group_radius - HUMAN_X / 2, x_cent=group_pose[0],
+                 y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
+
+    # P Space Modeling
+    plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=group_radius + HUMAN_X / 2, x_cent=group_pose[0],
+                 y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
+
+    # approaching circle area
+    plot_kwargs = {'color': 'c', 'linestyle': ':', 'linewidth': 2}
+    plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
+                 y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
+    approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
+                                    y_cent=group_pose[1], data_out=True)
+
+    # Possible approaching area computation and personal space ploting
+    plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
+
+    approaching_filter = approaching_area
+
+    for idx, person in enumerate(persons, start=1):
+        shapely_diff_sy = 0.5  # Error between python modules used
+        shapely_diff_sx = 1
+        personal_space = draw_personalspace(
+            person[0], person[1], person[2], ax, sx -
+            shapely_diff_sx, sy - shapely_diff_sy, plot_kwargs,
+            idx)  # plot using ellipse.py functions
+
+        # Approaching Area filtering - remove points that are inside the personal space of a person
+        approaching_filter = approachingfiltering(
+            personal_space, approaching_filter, idx)
+
+    # possible approaching positions
+    approaching_x = [j[0] for j in approaching_filter]
+    approaching_y = [k[1] for k in approaching_filter]
+    ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
+
+    return
 
 
 class SpaceModeling:
@@ -277,8 +323,8 @@ class SpaceModeling:
 
         for num, string in enumerate(file):
 
-            # 1 - Group inidivudals pose and o space center in input file.
-            # 2 - Only group individuals pose in input file.
+            # File Type 1 - Group inidivudals pose and o space center in input file.
+            # File Type 2 - Only group individuals pose in input file.
 
             if string.find('--') == -1:
                 file_type = 2
@@ -327,23 +373,6 @@ class SpaceModeling:
             persons = self.persons[k]
             group_nb = self.group_nb[k]
 
-            # O Space Modeling
-            ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
-            plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
-            plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=group_radius - HUMAN_X / 2, x_cent=group_pose[0],
-                         y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
-
-            # P Space Modeling
-            plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=group_radius + HUMAN_X / 2, x_cent=group_pose[0],
-                         y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
-
-            # approaching circle area
-            plot_kwargs = {'color': 'c', 'linestyle': ':', 'linewidth': 2}
-            plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
-                         y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
-            approaching_area = plot_ellipse(semimaj=group_radius, semimin=group_radius, x_cent=group_pose[0],
-                                            y_cent=group_pose[1], data_out=True)
-
             # Groups of 2 elements:
             if group_nb == 2:
 
@@ -389,31 +418,11 @@ class SpaceModeling:
                 # Check if the parameters are less then human dimensions
                 (sx, sy) = minimum_personalspace(sx, sy)
 
-            # Stores the parameters of the personal space
+            # Stores the parameters of the personal of the individuals of the group
             self.pspace_param[k] = (sx, sy)
 
-            # Possible approaching area computation and personal space ploting
-            plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
-
-            approaching_filter = approaching_area
-
-            for idx, person in enumerate(persons, start=1):
-                shapely_diff_sy = 0.5  # Error between python modules used
-                shapely_diff_sx = 1
-                personal_space = draw_personalspace(
-                    person[0], person[1], person[2], ax, sx -
-                    shapely_diff_sx, sy - shapely_diff_sy, plot_kwargs,
-                    idx)  # plot using ellipse.py functions
-
-                # Approaching Area filtering - remove points that are inside the personal space of a person
-                approaching_filter = approachingfiltering(
-                    personal_space, approaching_filter, idx)
-
-            # possible approaching positions
-            approaching_x = [j[0] for j in approaching_filter]
-            approaching_y = [k[1] for k in approaching_filter]
-
-            ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
+            # Plots personal space, group space, and possible approaching area
+            plot_group(group_pose, group_radius, ax, persons, sx, sy)
 
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
@@ -448,6 +457,53 @@ def main():
         wfile = open("data/pspace_parameters.txt", "w+")
         app.write_params(wfile)
         wfile.close()
+
+        while True:
+
+            try:
+                option = int(input(
+                    "Do you want to visualize a specific group? \n 1 - Yes\n 2 - No\n Option: "))
+            except ValueError:
+                print("Invalid Option. Choose option 1 or 2.")
+                print()
+                continue
+
+            if option == 1:
+
+                try:
+                    number = int(
+                        input("Choose a group to plot from 1 to " + str(len(app.group_nb)) + " : "))
+                except ValueError:
+                    print("Invalid group number.")
+                    print()
+                    continue
+                if number <= len(app.group_nb) and number > 0:
+                    idx = number - 1
+
+                    f, ax = plt.subplots(1)
+                    plot_group( app.group_pose[idx], app.group_radius[idx], ax,app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
+
+                    plt.xlabel('x [cm]')
+                    plt.ylabel('y [cm]')
+                    ax.set_aspect(aspect=1)
+                    if SHOW_PLOT:
+                        plt.tight_layout()
+                        plt.show(block=False)
+                        print("==================================================")
+                        input("Hit Enter To Close... ")
+                        plt.close()
+
+                else:
+                    print("Invalid group number.")
+                    print()
+                    continue
+
+            elif option == 2:
+                break
+            else:
+                print("Invalid Option. Choose option 1 or 2.")
+                print()
+                continue
 
         while True:
             try:
