@@ -257,7 +257,7 @@ def calc_o_space(persons):
 class SpaceModeling:
     """Models the personal space, group space and estimates the possibles approaching areas."""
 
-    def __init__(self, fh, file_type):
+    def __init__(self, fh):
         # Lists Initialization
 
         # split the file into lines
@@ -276,6 +276,15 @@ class SpaceModeling:
         self.pspace_param = [[] for i in range(n)]
 
         for num, string in enumerate(file):
+
+            # 1 - Group inidivudals pose and o space center in input file.
+            # 2 - Only group individuals pose in input file.
+
+            if string.find('--') == -1:
+                file_type = 2
+            else:
+                file_type = 1
+
             data = string.split("--")
             group = data[0].split(",")
 
@@ -429,12 +438,8 @@ def main():
     if len(sys.argv) > 1:
         file = "data/" + sys.argv[1]
 
-        # 1 - Group inidivudals pose and o space center in input file.
-        # 2 - Only group individuals pose in input file.
-        file_type = int(sys.argv[2])
-
         with open(file) as fh:
-            app = SpaceModeling(fh, file_type)
+            app = SpaceModeling(fh)
             app.solve()
 
             fh.close()
