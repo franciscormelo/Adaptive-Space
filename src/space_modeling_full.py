@@ -26,8 +26,8 @@ SHOW_PLOT = True
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
-HUMAN_Y = 62.5
-HUMAN_X = 37.5
+HUMAN_Y = 45
+HUMAN_X = 20
 
 # Personal Space Maximum 45 - 120 cm
 PSPACEX = 80.0
@@ -227,6 +227,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
         sy = sx / PFACTOR
 
+
     return sx, sy
 
 
@@ -241,7 +242,15 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     while intersect.area != 0:
         (sx, sy) = parameters_computation(person1, person2, sx, sy)
 
-        intersect = pspace_intersection(person1, person2, sx, sy)
+        #Check if two persons area overlap due to wrong human dimensions
+        intersect_human_dimensions = pspace_intersection(person1, person2, HUMAN_X/2, HUMAN_Y/2)
+        if intersect_human_dimensions.area != 0:
+            sx = HUMAN_X/2
+            sy = HUMAN_Y/2
+            break
+
+        else:
+            intersect = pspace_intersection(person1, person2, sx, sy)
 
     return sx, sy
 
