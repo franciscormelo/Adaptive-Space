@@ -190,6 +190,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         #Z = Z1
 
+        # Z matrix only updates maximum values
         cond = Z1 > Z
         Z[cond] = Z1[cond]
 
@@ -217,9 +218,11 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
         A1 = 1 / Z1.max()
         Z1 = A1 * Z1
+        
+        # Z matrix only updates maximum values
         cond = Z1 > Z
         Z[cond] = Z1[cond]
-        #Z = Z + Z1
+        
 
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=1,
                             antialiased=False, cmap="jet")
