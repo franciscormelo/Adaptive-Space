@@ -45,13 +45,15 @@ def plot_group(group_pose, group_radius, ax):
     # O Space Modeling
     ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
     plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
+
     ospace_radius = group_radius - HUMAN_X / 2
     plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=ospace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
 
-    psapce_radius = group_radius + HUMAN_X / 2
+    
     # P Space Modeling
+    psapce_radius = group_radius + HUMAN_X / 2
     plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=psapce_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
@@ -181,18 +183,16 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
             ellipse_param[0] / BACK_FACTOR, ellipse_param[1], person[2])
 
         # The distribution on the variables X, Y packed into pos.
-        #Zg = multivariate_gaussian(pos, mu, Sigma)
         Z1 = assymetric_gaussian(
             pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
         
 
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         #Z = Z1
-        #print(Z[Z<=0.1])
-        #print(Z.min())
-        Z = Z + Z1
-       # cond = Z <= 0.1
-        #Z[cond] = Z[cond] + Z1[cond]
+
+        cond = Z1 > Z
+        Z[cond] = Z1[cond]
+
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
@@ -217,7 +217,9 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
         A1 = 1 / Z1.max()
         Z1 = A1 * Z1
-        Z = Z + Z1
+        cond = Z1 > Z
+        Z[cond] = Z1[cond]
+        #Z = Z + Z1
 
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=1,
                             antialiased=False, cmap="jet")
