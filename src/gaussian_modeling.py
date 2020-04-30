@@ -20,8 +20,8 @@ from scipy.stats import multivariate_normal
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
-HUMAN_Y = 62.5
-HUMAN_X = 37.5
+HUMAN_Y = 45
+HUMAN_X = 20
 
 BACK_FACTOR = 1.3
 
@@ -45,11 +45,14 @@ def plot_group(group_pose, group_radius, ax):
     # O Space Modeling
     ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
     plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
-    plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=group_radius - HUMAN_X / 2, x_cent=group_pose[0],
+    ospace_radius = group_radius - HUMAN_X / 2
+    plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=ospace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
+
+    psapce_radius = group_radius + HUMAN_X / 2
     # P Space Modeling
-    plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=group_radius + HUMAN_X / 2, x_cent=group_pose[0],
+    plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=psapce_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
     # approaching circle area
