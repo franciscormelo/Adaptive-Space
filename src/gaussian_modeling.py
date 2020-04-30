@@ -142,10 +142,10 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     x = [item[0] for item in persons]
     y = [item[1] for item in persons]
 
-    xmin = min(x) - 100
-    xmax = max(x) + 100
-    ymin = min(y) - 100
-    ymax = max(y) + 100
+    xmin = min(x) - 150
+    xmax = max(x) + 150
+    ymin = min(y) - 150
+    ymax = max(y) + 150
 
     X = np.linspace(xmin, xmax, N)
     Y = np.linspace(ymin, ymax, N)
@@ -181,10 +181,15 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         #Zg = multivariate_gaussian(pos, mu, Sigma)
         Z1 = assymetric_gaussian(
             pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
+        
 
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         #Z = Z1
+        #print(Z[Z<=0.1])
+        #print(Z.min())
         Z = Z + Z1
+       # cond = Z <= 0.1
+        #Z[cond] = Z[cond] + Z1[cond]
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
@@ -195,12 +200,13 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     #
     # ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
 
-    show_group_space = False
+    show_group_space = True
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
+        ospace_radius = group_radius - HUMAN_X/2
 
-        Sigma = params_conversion(group_radius, group_radius, 0)
+        Sigma = params_conversion(ospace_radius, ospace_radius, 0)
 
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
         Z1 = multivariate_normal(mu, Sigma).pdf(pos)

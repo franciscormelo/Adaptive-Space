@@ -227,7 +227,6 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
         sy = sx / PFACTOR
 
-
     return sx, sy
 
 
@@ -242,11 +241,12 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
     while intersect.area != 0:
         (sx, sy) = parameters_computation(person1, person2, sx, sy)
 
-        #Check if two persons area overlap due to wrong human dimensions
-        intersect_human_dimensions = pspace_intersection(person1, person2, HUMAN_X/2, HUMAN_Y/2)
+        # Check if two persons area overlap due to wrong human dimensions
+        intersect_human_dimensions = pspace_intersection(
+            person1, person2, HUMAN_X / 2, HUMAN_Y / 2)
         if intersect_human_dimensions.area != 0:
-            sx = HUMAN_X/2
-            sy = HUMAN_Y/2
+            sx = HUMAN_X / 2
+            sy = HUMAN_Y / 2
             break
 
         else:
@@ -498,7 +498,8 @@ def main():
                     idx = number - 1
 
                     f, ax = plt.subplots(1)
-                    plot_group( app.group_pose[idx], app.group_radius[idx], ax,app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
+                    plot_group(app.group_pose[idx], app.group_radius[idx], ax,
+                               app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
 
                     plt.xlabel('x [cm]')
                     plt.ylabel('y [cm]')
