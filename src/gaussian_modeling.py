@@ -50,8 +50,6 @@ def plot_group(group_pose, group_radius, ax):
     plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=ospace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
-
-    
     # P Space Modeling
     psapce_radius = group_radius + HUMAN_X / 2
     plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=psapce_radius, x_cent=group_pose[0],
@@ -185,7 +183,6 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         # The distribution on the variables X, Y packed into pos.
         Z1 = assymetric_gaussian(
             pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
-        
 
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         #Z = Z1
@@ -193,7 +190,6 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         # Z matrix only updates maximum values
         cond = Z1 > Z
         Z[cond] = Z1[cond]
-
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
@@ -208,7 +204,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
-        ospace_radius = group_radius - HUMAN_X/2
+        ospace_radius = group_radius - HUMAN_X / 2
 
         Sigma = params_conversion(ospace_radius, ospace_radius, 0)
 
@@ -218,11 +214,10 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
 
         A1 = 1 / Z1.max()
         Z1 = A1 * Z1
-        
-        # Z matrix only updates maximum values
+
+        # Z matrix only updates maximum values -> When personal
         cond = Z1 > Z
         Z[cond] = Z1[cond]
-        
 
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=1,
                             antialiased=False, cmap="jet")

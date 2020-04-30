@@ -283,7 +283,6 @@ def plot_group(group_pose, group_radius, ax, persons, sx, sy):
     plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=ospace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
-
     psapce_radius = group_radius + HUMAN_X / 2
     # P Space Modeling
     plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=psapce_radius, x_cent=group_pose[0],
