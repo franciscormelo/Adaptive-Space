@@ -23,6 +23,7 @@ from scipy.stats import multivariate_normal
 HUMAN_Y = 45
 HUMAN_X = 20
 
+# Relation between personal frontal space and back space
 BACK_FACTOR = 1.3
 
 
@@ -72,16 +73,16 @@ def multivariate_gaussian(pos, mu, Sigma):
     Sigma_det = np.linalg.det(Sigma)
     Sigma_inv = np.linalg.inv(Sigma)
     N = np.sqrt((2 * np.pi)**n * Sigma_det)
+
     # This einsum call calculates (x-mu)T.Sigma-1.(x-mu) in a vectorized
     # way across all the input variables.
-
     fac = np.einsum('...k,kl,...l->...', pos - mu, Sigma_inv, pos - mu)
 
     return np.exp(-fac / 2) / N
 
 
-def assymetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
-    """ """
+def asymmetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
+    """ Computes an asymmetric  2D gaussian function using a function for the frontal part and another one for the back part"""
     Z1 = np.zeros([N, N])
     Z2 = np.zeros([N, N])
     angle = orientation + math.pi / 2
@@ -141,10 +142,15 @@ def params_conversion(sx, sy, angle):
 
 def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
+
+    # Initial Gaussians amplitude
     A = 1
+
+    # Gets the values of x and y of all the persons
     x = [item[0] for item in persons]
     y = [item[1] for item in persons]
 
+    # Gets the coordinates of a windows around the group
     xmin = min(x) - 150
     xmax = max(x) + 150
     ymin = min(y) - 150
@@ -181,7 +187,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
             ellipse_param[0] / BACK_FACTOR, ellipse_param[1], person[2])
 
         # The distribution on the variables X, Y packed into pos.
-        Z1 = assymetric_gaussian(
+        Z1 = asymmetric_gaussian(
             pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
 
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
@@ -194,11 +200,6 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
     approaching_area = plot_group(group_pos, group_radius, ax2)
-    # # possible approaching positions
-    # approaching_x = [j[0] for j in approaching_filter]
-    # approaching_y = [k[1] for k in approaching_filter]
-    #
-    # ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
 
     show_group_space = True
     if show_group_space:
