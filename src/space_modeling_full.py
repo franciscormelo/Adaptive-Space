@@ -275,7 +275,6 @@ def calc_o_space(persons):
 
 def plot_group(group_pose, group_radius, ax, persons, sx, sy):
     """Plots o-space, p-space, group center and approaching area."""
-    
     # O Space Modeling
     ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
     plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}

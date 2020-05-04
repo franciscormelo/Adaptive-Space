@@ -13,10 +13,11 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import math
 from ellipse import *
-from sklearn.preprocessing import normalize
 from matplotlib import rc
 
 from scipy.stats import multivariate_normal
+
+from approaching_pose import approaching_area_filtering
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -25,6 +26,9 @@ HUMAN_X = 20
 
 # Relation between personal frontal space and back space
 BACK_FACTOR = 1.3
+
+# APPROACHING LEVEL
+LEVEL = 1
 
 
 def plot_person(x, y, angle, ax, plot_kwargs):
@@ -126,19 +130,6 @@ def params_conversion(sx, sy, angle):
 
     return covariance
 
-# def approachingfiltering_gaussian(Z,X, Y approaching_area):
-#     """Filters the approaching area."""
-#     # Approaching Area filtering - remove points tha are inside the personal space of a person
-#     if idx == 1:
-#         approaching_filter = [(x, y) for x, y in zip(
-#             approaching_filter[0], approaching_filter[1]) if not personal_space.contains_point([x, y])]
-#     else:
-#         cx = [j[0] for j in approaching_filter]
-#         cy = [k[1] for k in approaching_filter]
-#         approaching_filter = [(x, y) for x, y in zip(
-#             cx, cy) if not personal_space.contains_point([x, y])]
-#     return approaching_filter
-
 
 def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
@@ -156,8 +147,10 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     ymin = min(y) - 150
     ymax = max(y) + 150
 
-    X = np.linspace(xmin, xmax, N)
-    Y = np.linspace(ymin, ymax, N)
+    X_lin = np.linspace(xmin, xmax, N)
+    Y_lin = np.linspace(ymin, ymax, N)
+    X = X_lin
+    Y = Y_lin
     X, Y = np.meshgrid(X, Y)
 
     # Pack X and Y into a single 3-dimensional array
@@ -227,8 +220,15 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     ax1.set_ylabel(r'$y (cm)$')
     ax1.set_zlabel(r'$Cost$')
 
-    CS = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
-    fig.colorbar(CS)
+    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
+    fig.colorbar(cs)
+
+    # Approaching Area filtering - remove points that are inside the personal space of a person
+    approaching_filter = approaching_area_filtering(X_lin, Y_lin, approaching_area, cs.allsegs[LEVEL][0])
+    x_approach = [j[0] for j in approaching_filter]
+    y_approach = [k[1] for k in approaching_filter]
+    ax2.plot(x_approach, y_approach, 'c.', markersize=5)
+
 
     ax2.set_xlabel(r'$x (cm)$')
     ax2.set_ylabel(r'$y (cm)$')
