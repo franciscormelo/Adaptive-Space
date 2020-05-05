@@ -220,7 +220,8 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     ax1.set_ylabel(r'$y (cm)$')
     ax1.set_zlabel(r'$Cost$')
 
-    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
+    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
+    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
     fig.colorbar(cs)
 
     # Approaching Area filtering - remove points that are inside the personal space of a person
