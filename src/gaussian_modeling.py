@@ -17,7 +17,7 @@ from matplotlib import rc
 
 from scipy.stats import multivariate_normal
 
-from approaching_pose import approaching_area_filtering
+from approaching_pose import *
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -131,6 +131,30 @@ def params_conversion(sx, sy, angle):
     return covariance
 
 
+def draw_arrow(x, y, angle):  # angle in radians
+    """Draws an arrow given a pose."""
+    r = 10  # or whatever fits you
+    plt.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
+              head_length=1, head_width=1, shape='full', color='black')
+
+
+def plot_robot(pose, ax):
+    x = pose[0]
+    y = pose[1]
+    angle = pose[2]
+
+    """Draws a robot from a top view."""
+    top_y = HUMAN_Y / 2
+    top_x = HUMAN_Y / 2
+    plot_kwargs = {'color': 'black', 'linestyle': '-', 'linewidth': 1}
+    plot_ellipse(semimaj=top_x, semimin=top_y,
+                 phi=angle, x_cent=x, y_cent=y, ax=ax, plot_kwargs=plot_kwargs)
+
+    draw_arrow(x, y, angle)  # orientation arrow angle in radians
+    ax.plot(x, y, 'o', color='black', markersize=5)
+    return
+
+
 def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_group_space=True):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
 
@@ -220,16 +244,26 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     ax1.set_ylabel(r'$y (cm)$')
     ax1.set_zlabel(r'$Cost$')
 
-    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
-    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
+    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
+    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
     fig.colorbar(cs)
 
     # Approaching Area filtering - remove points that are inside the personal space of a person
-    approaching_filter = approaching_area_filtering(X_lin, Y_lin, approaching_area, cs.allsegs[LEVEL][0])
+    approaching_filter = approaching_area_filtering(
+        X_lin, Y_lin, approaching_area, cs.allsegs[LEVEL][0])
     x_approach = [j[0] for j in approaching_filter]
     y_approach = [k[1] for k in approaching_filter]
     ax2.plot(x_approach, y_approach, 'c.', markersize=5)
 
+    robot_pose = [-100, 100, 3.14]
+    # Plots robot from top view
+    plot_robot(robot_pose, ax2)
+    ax2.annotate("Robot_Initial", (robot_pose[0], robot_pose[1]))
+
+    # Estimates the goal pose for the robot to approach the group
+    goal_pose = approaching_pose(robot_pose, approaching_filter, group_pos)
+    plot_robot(goal_pose, ax2)
+    ax2.annotate("Robot_Goal", (goal_pose[0], goal_pose[1]))
 
     ax2.set_xlabel(r'$x (cm)$')
     ax2.set_ylabel(r'$y (cm)$')

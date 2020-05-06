@@ -19,8 +19,9 @@ from matplotlib.patches import Polygon
 from shapely import affinity
 from typing import Any, Union
 from matplotlib import rc
-
+from approaching_pose import approachingfiltering_ellipses
 from gaussian_modeling import plot_gaussians
+
 
 SHOW_PLOT = True
 
@@ -86,20 +87,6 @@ def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
 
     # Multiply sx and sy by 2 to get the diameter
     return patches.Ellipse((x, y), sx * 2, sy * 2, math.degrees(angle))
-
-
-def approachingfiltering(personal_space, approaching_filter, idx):
-    """Filters the approaching area."""
-    # Approaching Area filtering - remove points tha are inside the personal space of a person
-    if idx == 1:
-        approaching_filter = [(x, y) for x, y in zip(
-            approaching_filter[0], approaching_filter[1]) if not personal_space.contains_point([x, y])]
-    else:
-        cx = [j[0] for j in approaching_filter]
-        cy = [k[1] for k in approaching_filter]
-        approaching_filter = [(x, y) for x, y in zip(
-            cx, cy) if not personal_space.contains_point([x, y])]
-    return approaching_filter
 
 
 def group_radius(persons, group_pose):
@@ -309,7 +296,7 @@ def plot_group(group_pose, group_radius, ax, persons, sx, sy):
             idx)  # plot using ellipse.py functions
 
         # Approaching Area filtering - remove points that are inside the personal space of a person
-        approaching_filter = approachingfiltering(
+        approaching_filter = approachingfiltering_ellipses(
             personal_space, approaching_filter, idx)
 
     # possible approaching positions
