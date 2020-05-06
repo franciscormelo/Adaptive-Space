@@ -55,11 +55,11 @@ def approaching_pose(robot_pose, approaching_area, group_center):
     for i in range(len(approaching_area)):
         if i == 0:
             min_dis = euclidean_distance(
-                robot_pose[0], robot_pose[1], approaching_area[i][0], approaching_area[i][0])
+                robot_pose[0], robot_pose[1], approaching_area[i][0], approaching_area[i][1])
             min_idx = 0
         else:
             dis = euclidean_distance(
-                robot_pose[0], robot_pose[1], approaching_area[i][0], approaching_area[i][0])
+                robot_pose[0], robot_pose[1], approaching_area[i][0], approaching_area[i][1])
 
             if dis < min_dis:
                 min_dis = dis
