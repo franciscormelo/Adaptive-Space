@@ -91,13 +91,35 @@ def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
 
 def group_radius(persons, group_pose):
     """Computes the radius of a group."""
+    group_radius = 0  # average of the distance of the group members to the center
+    pspace_radius = 0  # Based on the closest person to the group center
+    ospace_radius = 0  # Based on the farthest persons to the group center
+
     sum_radius = 0
     for i in range(len(persons)):
         # average of the distance between the group members and the center of the group, o-space radius
-        sum_radius += euclidean_distance(persons[i][0],
-                                         persons[i][1], group_pose[0], group_pose[1])
+        distance = euclidean_distance(persons[i][0],
+                                      persons[i][1], group_pose[0], group_pose[1])
+        sum_radius += distance
 
-    return sum_radius / len(persons)
+        if ospace_radius == 0:
+            ospace_radius = distance
+        else:
+            ospace_aux = distance
+            if ospace_aux < ospace_radius:
+                ospace_radius = ospace_aux
+
+        if pspace_radius == 0:
+            pspace_radius = distance
+        else:
+            pspace_aux = distance
+            if pspace_aux > pspace_radius:
+                pspace_radius = pspace_aux
+
+    pspace_radius += HUMAN_X / 2
+    ospace_radius -= HUMAN_X / 2
+    group_radius = sum_radius / len(persons)
+    return group_radius, pspace_radius, ospace_radius
 
 
 def pspace_intersection(person1, person2, sigmax, sigmay):
@@ -260,19 +282,17 @@ def calc_o_space(persons):
     return center
 
 
-def plot_group(group_pose, group_radius, ax, persons, sx, sy):
+def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax, persons, sx, sy):
     """Plots o-space, p-space, group center and approaching area."""
     # O Space Modeling
     ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
     plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
 
-    ospace_radius = group_radius - HUMAN_X / 2
-    plot_ellipse(semimaj=group_radius - HUMAN_X / 2, semimin=ospace_radius, x_cent=group_pose[0],
+    plot_ellipse(semimaj=ospace_radius, semimin=ospace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
-    psapce_radius = group_radius + HUMAN_X / 2
     # P Space Modeling
-    plot_ellipse(semimaj=group_radius + HUMAN_X / 2, semimin=psapce_radius, x_cent=group_pose[0],
+    plot_ellipse(semimaj=pspace_radius, semimin=pspace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
     # approaching circle area
@@ -322,7 +342,8 @@ class SpaceModeling:
 
         # Lists intialization
         self.persons = [[] for i in range(n)]
-        self.group_data = {'group_pose' : [],'group_radius' : [], 'ospace_radius': [] , 'pspace_radius' : [], 'group_nb' :[]}
+        self.group_data = {'group_pose': [], 'group_radius': [],
+                           'ospace_radius': [], 'pspace_radius': [], 'group_nb': []}
         # Stores the personal space parameteres for each group
         self.pspace_param = [[] for i in range(n)]
 
@@ -339,7 +360,8 @@ class SpaceModeling:
             data = string.split("--")
             group = data[0].split(",")
 
-            self.group_data['group_nb'].append(len(group))  # Numbers of members in a group
+            self.group_data['group_nb'].append(
+                len(group))  # Numbers of members in a group
 
             for person in group:
                 person_pose = person[person.find('['):person.find(']') + 1]
@@ -359,17 +381,20 @@ class SpaceModeling:
 
             #######
             elif file_type == 2:  # No group o-space information
-                self.group_data['group_pose'].append(tuple(calc_o_space(self.persons[num])))
+                self.group_data['group_pose'].append(
+                    tuple(calc_o_space(self.persons[num])))
 
             # computes group radius given the center of the o-space
-            radius = group_radius(self.persons[num], self.group_data['group_pose'][num])
-            self.group_data['group_radius'].append(radius)
-           # self.group_radius.append(radius)
-
+            group_radius1, pspace_radius, ospace_radius = group_radius(
+                self.persons[num], self.group_data['group_pose'][num])
+            self.group_data['group_radius'].append(group_radius1)
+            self.group_data['ospace_radius'].append(ospace_radius)
+            self.group_data['pspace_radius'].append(pspace_radius)
 
             #
-            #codigo calculo p space e o space numa funcao. 
-            # 
+            # codigo calculo p space e o space numa funcao.
+            #
+
     def solve(self):
         """ Estimates the personal space and group space."""
         f, ax = plt.subplots(1)
@@ -378,11 +403,12 @@ class SpaceModeling:
         for k in range(len(self.group_data['group_nb'])):
             print("Modeling Group " + str(k + 1) + " ...")
 
-            #group_radius = self.group_radius[k]
             group_radius = self.group_data['group_radius'][k]
+            pspace_radius = self.group_data['pspace_radius'][k]
+            ospace_radius = self.group_data['ospace_radius'][k]
             group_pose = self.group_data['group_pose'][k]
             persons = self.persons[k]
-            group_nb =self.group_data['group_nb'][k]
+            group_nb = self.group_data['group_nb'][k]
 
             # Groups of 2 elements:
             if group_nb == 2:
@@ -433,7 +459,7 @@ class SpaceModeling:
             self.pspace_param[k] = (sx, sy)
 
             # Plots personal space, group space, and possible approaching area
-            plot_group(group_pose, group_radius, ax, persons, sx, sy)
+            plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax, persons, sx, sy)
 
         plt.xlabel('x [cm]')
         plt.ylabel('y [cm]')
@@ -492,7 +518,7 @@ def main():
                     idx = number - 1
 
                     f, ax = plt.subplots(1)
-                    plot_group(app.group_data['group_pose'][idx], app.group_data['group_radius'][idx], ax,
+                    plot_group(app.group_data['group_pose'][idx], app.group_data['group_radius'][idx], app.group_data['pspace_radius'][idx], app.group_data['ospace_radius'][idx], ax,
                                app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
 
                     plt.xlabel('x [cm]')
@@ -538,8 +564,8 @@ def main():
                 if number <= len(app.group_data['group_nb']) and number > 0:
                     idx = number - 1
 
-                    plot_gaussians(app.persons[idx], app.group_data['group_pose'][idx],
-                                   app.group_data['group_radius'][idx], app.pspace_param[idx])
+                    plot_gaussians(
+                        app.persons[idx], app.group_data, idx, app.pspace_param[idx])
                 else:
                     print("Invalid group number.")
                     print()
