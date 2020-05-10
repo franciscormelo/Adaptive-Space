@@ -243,7 +243,7 @@ def iterative_intersections(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
 
 
 def calc_o_space(persons):
-    """Calculates the o-space of the group given group members pose"""
+    """Calculates the o-space center of the group given group members pose"""
     c_x = 0
     c_y = 0
     o_sp_radius = 0
@@ -321,10 +321,8 @@ class SpaceModeling:
         n = len(file)  # Number of groups in the file
 
         # Lists intialization
-        self.group_nb = []
         self.persons = [[] for i in range(n)]
-        self.group_pose = []
-        self.group_radius = []
+        self.group_data = {'group_pose' : [],'group_radius' : [], 'ospace_radius': [] , 'pspace_radius' : [], 'group_nb' :[]}
         # Stores the personal space parameteres for each group
         self.pspace_param = [[] for i in range(n)]
 
@@ -341,7 +339,7 @@ class SpaceModeling:
             data = string.split("--")
             group = data[0].split(",")
 
-            self.group_nb.append(len(group))  # Numbers of members in a group
+            self.group_data['group_nb'].append(len(group))  # Numbers of members in a group
 
             for person in group:
                 person_pose = person[person.find('['):person.find(']') + 1]
@@ -356,29 +354,35 @@ class SpaceModeling:
 
                 # Saves the group center i.e. o space center
                 group_center = data[1].split(",")
-                self.group_pose.append(tuple([float(group_center[0][1:]), float(
+                self.group_data['group_pose'].append(tuple([float(group_center[0][1:]), float(
                     group_center[1][:-1])]))  # o space center point
 
             #######
             elif file_type == 2:  # No group o-space information
-                self.group_pose.append(tuple(calc_o_space(self.persons[num])))
+                self.group_data['group_pose'].append(tuple(calc_o_space(self.persons[num])))
 
             # computes group radius given the center of the o-space
-            radius = group_radius(self.persons[num], self.group_pose[num])
-            self.group_radius.append(radius)
+            radius = group_radius(self.persons[num], self.group_data['group_pose'][num])
+            self.group_data['group_radius'].append(radius)
+           # self.group_radius.append(radius)
 
+
+            #
+            #codigo calculo p space e o space numa funcao. 
+            # 
     def solve(self):
         """ Estimates the personal space and group space."""
         f, ax = plt.subplots(1)
 
         # Iterate over groups
-        for k in range(len(self.group_nb)):
+        for k in range(len(self.group_data['group_nb'])):
             print("Modeling Group " + str(k + 1) + " ...")
 
-            group_radius = self.group_radius[k]
-            group_pose = self.group_pose[k]
+            #group_radius = self.group_radius[k]
+            group_radius = self.group_data['group_radius'][k]
+            group_pose = self.group_data['group_pose'][k]
             persons = self.persons[k]
-            group_nb = self.group_nb[k]
+            group_nb =self.group_data['group_nb'][k]
 
             # Groups of 2 elements:
             if group_nb == 2:
@@ -479,16 +483,16 @@ def main():
 
                 try:
                     number = int(
-                        input("Choose a group to plot from 1 to " + str(len(app.group_nb)) + " : "))
+                        input("Choose a group to plot from 1 to " + str(len(app.group_data['group_nb'])) + " : "))
                 except ValueError:
                     print("Invalid group number.")
                     print()
                     continue
-                if number <= len(app.group_nb) and number > 0:
+                if number <= len(app.group_data['group_nb']) and number > 0:
                     idx = number - 1
 
                     f, ax = plt.subplots(1)
-                    plot_group(app.group_pose[idx], app.group_radius[idx], ax,
+                    plot_group(app.group_data['group_pose'][idx], app.group_data['group_radius'][idx], ax,
                                app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
 
                     plt.xlabel('x [cm]')
@@ -526,16 +530,16 @@ def main():
 
                 try:
                     number = int(
-                        input("Choose a group to plot from 1 to " + str(len(app.group_nb)) + " : "))
+                        input("Choose a group to plot from 1 to " + str(len(app.group_data['group_nb'])) + " : "))
                 except ValueError:
                     print("Invalid group number.")
                     print()
                     continue
-                if number <= len(app.group_nb) and number > 0:
+                if number <= len(app.group_data['group_nb']) and number > 0:
                     idx = number - 1
 
-                    plot_gaussians(app.persons[idx], app.group_pose[idx],
-                                   app.group_radius[idx], app.pspace_param[idx])
+                    plot_gaussians(app.persons[idx], app.group_data['group_pose'][idx],
+                                   app.group_data['group_radius'][idx], app.pspace_param[idx])
                 else:
                     print("Invalid group number.")
                     print()

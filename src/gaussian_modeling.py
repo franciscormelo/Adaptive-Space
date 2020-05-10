@@ -210,7 +210,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
         #Z = Z1
 
-        # Z matrix only updates maximum values
+        # Z matrix only updates the values where Z1 > Z
         cond = Z1 > Z
         Z[cond] = Z1[cond]
 
@@ -233,7 +233,7 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
         A1 = 1 / Z1.max()
         Z1 = A1 * Z1
 
-        # Z matrix only updates maximum values -> When personal
+        # Z matrix only updates the values where Z1 > Z
         cond = Z1 > Z
         Z[cond] = Z1[cond]
 
@@ -244,8 +244,8 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     ax1.set_ylabel(r'$y (cm)$')
     ax1.set_zlabel(r'$Cost$')
 
-    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
-    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
+    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
+    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
     fig.colorbar(cs)
 
     # Approaching Area filtering - remove points that are inside the personal space of a person
@@ -255,16 +255,16 @@ def plot_gaussians(persons, group_pos, group_radius, ellipse_param, N=200, show_
     y_approach = [k[1] for k in approaching_filter]
     ax2.plot(x_approach, y_approach, 'c.', markersize=5)
 
-    robot_pose = [0, 0, 3.14]
+   # robot_pose = [0, 0, 3.14]
     # Plots robot from top view
-    plot_robot(robot_pose, ax2)
-    ax2.annotate("Robot_Initial", (robot_pose[0], robot_pose[1]))
+   # plot_robot(robot_pose, ax2)
+    #ax2.annotate("Robot_Initial", (robot_pose[0], robot_pose[1]))
 
     # Estimates the goal pose for the robot to approach the group
-    goal_pose = approaching_pose(robot_pose, approaching_filter, group_pos)
-    print("Goal Pose (cm,cm,rad) = " + str(goal_pose))
-    plot_robot(goal_pose, ax2)
-    ax2.annotate("Robot_Goal", (goal_pose[0], goal_pose[1]))
+    #goal_pose = approaching_pose(robot_pose, approaching_filter, group_pos)
+    #print("Goal Pose (cm,cm,rad) = " + str(goal_pose))
+    #plot_robot(goal_pose, ax2)
+    #ax2.annotate("Robot_Goal", (goal_pose[0], goal_pose[1]))
 
     ax2.set_xlabel(r'$x (cm)$')
     ax2.set_ylabel(r'$y (cm)$')
