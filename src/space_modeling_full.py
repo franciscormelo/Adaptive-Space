@@ -474,9 +474,9 @@ class SpaceModeling:
 
     def write_params(self, fw):
         "Writes in a file the parameters of the personal space for each group."
-        fw.write("(Sx,Sy)\n")
+        fw.write("Nb of members - (Sx,Sy)\n")
         for i in range(len(self.pspace_param)):
-            fw.write(
+            fw.write(str(self.group_data['group_nb'][i]) + "-"
                 "(" + str(self.pspace_param[i][0]) + "," + str(self.pspace_param[i][1]) + ")\n")
 
 
