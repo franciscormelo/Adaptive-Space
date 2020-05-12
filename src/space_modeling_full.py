@@ -21,6 +21,7 @@ from typing import Any, Union
 from matplotlib import rc
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_modeling import plot_gaussians
+from matplotlib import rc
 
 
 SHOW_PLOT = True
@@ -460,11 +461,12 @@ class SpaceModeling:
 
             # Plots personal space, group space, and possible approaching area
             plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax, persons, sx, sy)
-
-        plt.xlabel('x [cm]')
-        plt.ylabel('y [cm]')
-        plt.savefig('destination_path.eps', format='eps')
+        plt.rc('text', usetex=True)
+        plt.rc('font', family='serif')
+        plt.xlabel(r'$x$ $[cm]$')
+        plt.ylabel(r'$y$ $[cm]$')
         ax.set_aspect(aspect=1)
+        plt.savefig('figures/space_modeling.eps', format='eps')
         if SHOW_PLOT:
             plt.tight_layout()
             plt.show(block=False)
@@ -521,8 +523,11 @@ def main():
                     plot_group(app.group_data['group_pose'][idx], app.group_data['group_radius'][idx], app.group_data['pspace_radius'][idx], app.group_data['ospace_radius'][idx], ax,
                                app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
 
-                    plt.xlabel('x [cm]')
-                    plt.ylabel('y [cm]')
+
+                    plt.rc('text', usetex=True)
+                    plt.rc('font', family='serif')
+                    plt.xlabel(r'$x$ $[cm]$')
+                    plt.ylabel(r'$y$ $[cm]$')
                     ax.set_aspect(aspect=1)
                     if SHOW_PLOT:
                         plt.tight_layout()

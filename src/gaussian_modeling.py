@@ -19,6 +19,8 @@ from scipy.stats import multivariate_normal
 
 from approaching_pose import *
 
+
+
 # CONSTANTS
 # Human Body Dimensions top view in cm
 HUMAN_Y = 45
@@ -244,9 +246,11 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=1,
                             antialiased=False, cmap="jet")
 
-    ax1.set_xlabel(r'$x (cm)$')
-    ax1.set_ylabel(r'$y (cm)$')
-    ax1.set_zlabel(r'$Cost$')
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+    ax1.set_xlabel(r'$x$ $[cm]$')
+    ax1.set_ylabel(r'$y$ $[cm]$')
+    ax1.set_zlabel(r'Cost')
 
     cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
     #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
@@ -269,9 +273,8 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     #print("Goal Pose (cm,cm,rad) = " + str(goal_pose))
     #plot_robot(goal_pose, ax2)
     #ax2.annotate("Robot_Goal", (goal_pose[0], goal_pose[1]))
-
-    ax2.set_xlabel(r'$x (cm)$')
-    ax2.set_ylabel(r'$y (cm)$')
+    ax2.set_xlabel(r'$x$ $[cm]$')
+    ax2.set_ylabel(r'$y$ $[cm]$')
     ax2.set_aspect(aspect=1)
     fig.tight_layout()
     plt.show(block=False)
