@@ -50,10 +50,13 @@ class Histogram:
         """ Plots Histogram of x and y parameters of personal space"""
         x = self.group_info['param_x']
         y = self.group_info['param_y']
-        fig, ax = plt.subplots(tight_layout=True)
+        #fig, ax = plt.subplots(tight_layout=True)
         #hist = ax.hist2d(x, y)
-        print(y)
-        plt.hist(y, bins=10)
+        n_bins = 20
+        fig, axs = plt.subplots(1, 2, sharey=True, tight_layout=True)
+        # We can set the number of bins with the `bins` kwarg
+        axs[0].hist(x, bins=n_bins)
+        axs[1].hist(y, bins=n_bins)
 
         plt.show(block=False)
         print("==================================================")
