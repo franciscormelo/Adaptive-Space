@@ -43,6 +43,7 @@ def approaching_area_filtering(x, y, approaching_area, contour_points):
     cy = [k[1] for k in contour_points]
     polygon = Polygon(contour_points)
 
+
     approaching_filter = [(x, y) for x, y in zip(
         approaching_area[0], approaching_area[1]) if not polygon.contains(Point([x, y]))]
 

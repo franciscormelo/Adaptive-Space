@@ -20,7 +20,6 @@ from scipy.stats import multivariate_normal
 from approaching_pose import *
 
 
-
 # CONSTANTS
 # Human Body Dimensions top view in cm
 HUMAN_Y = 45
@@ -47,18 +46,17 @@ def plot_person(x, y, angle, ax, plot_kwargs):
                  phi=angle, x_cent=x, y_cent=y, ax=ax)
 
 
-def plot_group(group_pose,group_radius, pspace_radius,ospace_radius, ax):
+def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax):
     """Plots the group o space, p space and approaching circle area. """
     # O Space Modeling
     ax.plot(group_pose[0], group_pose[1], 'rx', markersize=8)
     plot_kwargs = {'color': 'r', 'linestyle': '-', 'linewidth': 1}
 
-    
     plot_ellipse(semimaj=ospace_radius, semimin=ospace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
     # P Space Modeling
-    
+
     plot_ellipse(semimaj=pspace_radius, semimin=pspace_radius, x_cent=group_pose[0],
                  y_cent=group_pose[1], ax=ax, plot_kwargs=plot_kwargs)
 
@@ -222,7 +220,8 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
         plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
 
-    approaching_area = plot_group(group_pos, group_radius,pspace_radius, ospace_radius, ax2)
+    approaching_area = plot_group(
+        group_pos, group_radius, pspace_radius, ospace_radius, ax2)
 
     show_group_space = True
     if show_group_space:
