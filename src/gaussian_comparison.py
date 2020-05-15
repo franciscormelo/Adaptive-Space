@@ -19,6 +19,8 @@ from scipy.stats import multivariate_normal
 
 from approaching_pose import *
 
+import sys
+
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -76,23 +78,23 @@ def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax):
     return approaching_area
 
 
-def multivariate_gaussian(pos, mu, Sigma):
+def multivariate_gaussian(pos, mu, sigma):
     """Return the multivariate Gaussian distribution on array pos."""
     # Adapted from: https://stackoverflow.com/questions/28342968/how-to-plot-a-2d-gaussian-with-different-sigma
     # https://scipython.com/blog/visualizing-the-bivariate-gaussian-distribution/
     n = mu.shape[0]  # Dimension
-    Sigma_det = np.linalg.det(Sigma)
-    Sigma_inv = np.linalg.inv(Sigma)
-    N = np.sqrt((2 * np.pi)**n * Sigma_det)
+    sigma_det = np.linalg.det(sigma)
+    sigma_inv = np.linalg.inv(sigma)
+    N = np.sqrt((2 * np.pi)**n * sigma_det)
 
-    # This einsum call calculates (x-mu)T.Sigma-1.(x-mu) in a vectorized
+    # This einsum call calculates (x-mu)T.sigma-1.(x-mu) in a vectorized
     # way across all the input variables.
-    fac = np.einsum('...k,kl,...l->...', pos - mu, Sigma_inv, pos - mu)
+    fac = np.einsum('...k,kl,...l->...', pos - mu, sigma_inv, pos - mu)
 
     return np.exp(-fac / 2) / N
 
 
-def asymmetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
+def asymmetric_gaussian(pos, mu, sigma, orientation, center, N, sigma_back):
     """ Computes an asymmetric  2D gaussian function using a function for the frontal part and another one for the back part"""
     Z1 = np.zeros([N, N])
     Z2 = np.zeros([N, N])
@@ -107,14 +109,14 @@ def asymmetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
     # Compute the nor- malized angle of the line
     aux1 = np.arctan2(np.sin(cond), np.cos(cond)) > 0
     pos1 = pos[:, :][aux1]
-    Z1[aux1] = multivariate_gaussian(pos1, mu, Sigma)
+    Z1[aux1] = multivariate_gaussian(pos1, mu, sigma)
 
     # Back Gaussian
     #aux2 = (cond + np.pi) % (2 * np.pi) - np.pi <= 0
     # Compute the nor- malized angle of the line
     aux2 = np.arctan2(np.sin(cond), np.cos(cond)) <= 0
     pos2 = pos[:, :][aux2]
-    Z2[aux2] = multivariate_gaussian(pos2, mu, Sigma_back)
+    Z2[aux2] = multivariate_gaussian(pos2, mu, sigma_back)
 
     # Normalization
     A1 = 1 / Z1.max()
@@ -169,6 +171,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     pspace_radius = group_data['pspace_radius'][idx]
     ospace_radius = group_data['ospace_radius'][idx]
     group_pos = group_data['group_pose'][idx]
+
     # Initial Gaussians amplitude
     A = 1
 
@@ -193,120 +196,56 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
 
-    Z = np.empty([N, N])
+    Z_A = np.empty([N, N])
 
 
     # plot using subplots
-    fig = plt.figure()
-
-    ax1 = fig.add_subplot(1, 2, 2)
-
-    ax2 = fig.add_subplot(1, 2, 1)
+    fig, axs = plt.subplots(1, 2, sharey=False, tight_layout=True)
 
     plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
     # Personal Space as gaussian for each person in the group
 
+    Z_F = np.empty([N, N])
+
     for person in persons:
+        sigma = None
+        sigma_back = None
         Z1 = None
         mu = np.array([person[0], person[1]])
-        Sigma = params_conversion(
+        mu = np.array([person[0], person[1]])
+
+        sigma = params_conversion(
             ellipse_param[0], ellipse_param[1], person[2])
 
-        Sigma_back = params_conversion(
+        sigma_back = params_conversion(
             ellipse_param[0] / BACK_FACTOR, ellipse_param[1], person[2])
 
         # The distribution on the variables X, Y packed into pos.
         Z1 = asymmetric_gaussian(
-            pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
+            pos, mu, sigma, person[2], (person[0], person[1]), N, sigma_back)
 
-        #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
-        #Z = Z1
 
-        # Z matrix only updates the values where Z1 > Z
-        cond = Z1 > Z
-        Z[cond] = Z1[cond]
-
-        plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
-
-    approaching_area = plot_group(
-        group_pos, group_radius, pspace_radius, ospace_radius, ax2)
-
-    show_group_space = True
-    if show_group_space:
-        Z1 = None
-        mu = np.array([group_pos[0], group_pos[1]])
-        ospace_radius = group_radius - HUMAN_X / 2
-
-        Sigma = params_conversion(ospace_radius, ospace_radius, 0)
-
-        Z1 = A * multivariate_gaussian(pos, mu, Sigma)
-        Z1 = multivariate_normal(mu, Sigma).pdf(pos)
-        # Normalization
-
-        A1 = 1 / Z1.max()
-        Z1 = A1 * Z1
-
-        # Z matrix only updates the values where Z1 > Z
-        cond = Z1 > Z
-        Z[cond] = Z1[cond]
-    cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
-    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
-    #fig.colorbar(cs)
-
-    # Approaching Area filtering - remove points that are inside the personal space of a person
-    approaching_filter = approaching_area_filtering(
-        X_lin, Y_lin, approaching_area, cs.allsegs[LEVEL][0])
-    
-    x_approach = [j[0] for j in approaching_filter]
-    y_approach = [k[1] for k in approaching_filter]
-    approaching_perimeter = (len(x_approach) * 2 * math.pi * group_radius)/len(approaching_area[0])
-    ax2.plot(x_approach, y_approach, 'c.', markersize=5)
-
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
-    ax2.set_xlabel(r'$x$ $[cm]$')
-    ax2.set_ylabel(r'$y$ $[cm]$')
-    ax2.set_title(
-            r'Adaptive Parameters - Perimeter = %d $cm$' % approaching_perimeter)
-    #ax1.set_zlabel(r'Cost')
-    ###########################################################################
-    Z_F = np.empty([N, N])
-    for person in persons:
-        Z1 = None
-        mu = np.array([person[0], person[1]])
-        Sigma = params_conversion(
-            F_PSPACEX, F_PSPACEY, person[2])
-
-        Sigma_back = params_conversion(
-            F_PSPACEX / BACK_FACTOR, F_PSPACEY, person[2])
-
-        # The distribution on the variables X, Y packed into pos.
-        Z1 = asymmetric_gaussian(
-            pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
-
-        #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
-        #Z = Z1
 
         # Z matrix only updates the values where Z1 > Z
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
-        plot_person(person[0], person[1], person[2], ax1, plot_kwargs)
+        plot_person(person[0], person[1], person[2], axs[0], plot_kwargs)
 
     F_approaching_area = plot_group(
-        group_pos, group_radius, pspace_radius, ospace_radius, ax1)
+        group_pos, group_radius, pspace_radius, ospace_radius, axs[0])
     
 
     show_group_space = True
+    sigma = None
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
-        ospace_radius = group_radius - HUMAN_X / 2
 
-        Sigma = params_conversion(ospace_radius, ospace_radius, 0)
+        sigma = params_conversion(ospace_radius, ospace_radius, 0)
 
-        Z1 = A * multivariate_gaussian(pos, mu, Sigma)
-        Z1 = multivariate_normal(mu, Sigma).pdf(pos)
+        Z1 = A * multivariate_gaussian(pos, mu, sigma)
+        Z1 = multivariate_normal(mu, sigma).pdf(pos)
         # Normalization
 
         A1 = 1 / Z1.max()
@@ -316,7 +255,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
-    cs1 = ax1.contour(X,Y,Z_F,cmap="jet", linewidths=0.8, levels=10)
+    cs1 = axs[0].contour(X,Y,Z_F,cmap="jet", linewidths=0.8, levels=10)
 
 
     F_approaching_filter = approaching_area_filtering(
@@ -326,19 +265,88 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     
 
     F_approaching_perimeter = (len(F_x_approach) * 2 * math.pi * group_radius)/len(F_approaching_area[0])
-    ax1.plot(F_x_approach, F_y_approach, 'c.', markersize=5)
+    axs[0].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
 
 
-    ax1.set_xlabel(r'$x$ $[cm]$')
-    ax1.set_ylabel(r'$y$ $[cm]$')
-    ax1.set_title(r'Fixed Parameters - Perimeter =  %d $cm$' % F_approaching_perimeter)
+    axs[0].set_xlabel(r'$x$ $[cm]$')
+    axs[0].set_ylabel(r'$y$ $[cm]$')
+    axs[0].set_title(r'Adaptive Parameters - Perimeter =  %d $cm$' % F_approaching_perimeter)
+    axs[0].set_aspect(aspect=1)
+    ###########################################################################
+    Z_F = np.empty([N, N])
+
+    for person in persons:
+        sigma = None
+        sigma_back = None
+        Z1 = None
+        mu = np.array([person[0], person[1]])
+        sigma = params_conversion(
+            F_PSPACEX, F_PSPACEY, person[2])
+
+        sigma_back = params_conversion(
+            F_PSPACEX / BACK_FACTOR, F_PSPACEY, person[2])
+
+        # The distribution on the variables X, Y packed into pos.
+        Z1 = asymmetric_gaussian(
+            pos, mu, sigma, person[2], (person[0], person[1]), N, sigma_back)
+
+
+        # Z matrix only updates the values where Z1 > Z
+        cond = Z1 > Z_F
+        Z_F[cond] = Z1[cond]
+
+        plot_person(person[0], person[1], person[2], axs[1], plot_kwargs)
+
+    F_approaching_area = plot_group(
+        group_pos, group_radius, pspace_radius, ospace_radius, axs[1])
+    
+
+    show_group_space = True
+    sigma = None
+    if show_group_space:
+        Z1 = None
+        mu = np.array([group_pos[0], group_pos[1]])
+        
+        sigma = params_conversion(ospace_radius, ospace_radius, 0)
+
+        Z1 = A * multivariate_gaussian(pos, mu, sigma)
+        Z1 = multivariate_normal(mu, sigma).pdf(pos)
+        # Normalization
+
+        A1 = 1 / Z1.max()
+        Z1 = A1 * Z1
+
+        # Z matrix only updates the values where Z1 > Z
+        cond = Z1 > Z_F
+        Z_F[cond] = Z1[cond]
+
+    cs1 = axs[1].contour(X,Y,Z_F,cmap="jet", linewidths=0.8, levels=10)
+
+
+    F_approaching_filter = approaching_area_filtering(
+        X_lin, Y_lin, F_approaching_area, cs1.allsegs[LEVEL][0])
+    F_x_approach = [j[0] for j in F_approaching_filter]
+    F_y_approach = [k[1] for k in F_approaching_filter]
+    
+
+    F_approaching_perimeter = (len(F_x_approach) * 2 * math.pi * group_radius)/len(F_approaching_area[0])
+    axs[1].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
+
+
+    axs[1].set_xlabel(r'$x$ $[cm]$')
+    axs[1].set_ylabel(r'$y$ $[cm]$')
+    axs[1].set_title(r'Fixed Parameters - Perimeter =  %d $cm$' % F_approaching_perimeter)
 
     ########################################################################
-    ax1.set_aspect(aspect=1)
-    ax2.set_aspect(aspect=1)
+    
+    axs[1].set_aspect(aspect=1)
     fig.tight_layout()
     plt.show(block=False)
     print("==================================================")
     input("Hit Enter To Close... ")
+    plt.cla()
     plt.clf()
     plt.close()
+    del group_pos
+    del ellipse_param
+

@@ -588,6 +588,7 @@ def main():
 
                     plot_gaussians(
                         app.persons[idx], app.group_data, idx, app.pspace_param[idx])
+                    
                 else:
                     print("Invalid group number.")
                     print()

@@ -227,7 +227,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
-        ospace_radius = group_radius - HUMAN_X / 2
+
 
         Sigma = params_conversion(ospace_radius, ospace_radius, 0)
 
