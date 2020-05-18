@@ -139,11 +139,12 @@ def draw_arrow(x, y, angle):  # angle in radians
 
 
 def plot_robot(pose, ax):
+     """Draws a robot from a top view."""
     x = pose[0]
     y = pose[1]
     angle = pose[2]
 
-    """Draws a robot from a top view."""
+   
     top_y = HUMAN_Y / 2
     top_x = HUMAN_Y / 2
     plot_kwargs = {'color': 'black', 'linestyle': '-', 'linewidth': 1}
@@ -152,7 +153,7 @@ def plot_robot(pose, ax):
 
     draw_arrow(x, y, angle)  # orientation arrow angle in radians
     ax.plot(x, y, 'o', color='black', markersize=5)
-    return
+    
 
 
 def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):

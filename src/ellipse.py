@@ -103,8 +103,8 @@ def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3,
     else:
         ax.plot(data[0], data[1], **plot_kwargs)
 
-    if fill == True:
+    if fill:
         ax.fill(data[0], data[1], **fill_kwargs)
 
-    if return_fig == True:
+    if return_fig:
         return fig

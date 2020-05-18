@@ -38,7 +38,7 @@ def approachingfiltering_ellipses(personal_space, approaching_filter, idx):
 
 def approaching_area_filtering(x, y, approaching_area, contour_points):
     """ Filters the approaching area by checking the points where the cost is zero."""
-    """ A point has zero cost if it is outside the personal space of all members of the group and group space."""
+
     cx = [j[0] for j in contour_points]
     cy = [k[1] for k in contour_points]
     polygon = Polygon(contour_points)
@@ -53,7 +53,7 @@ def approaching_area_filtering(x, y, approaching_area, contour_points):
 def approaching_pose(robot_pose, approaching_area, group_center):
     """Chooses the nearest center point to the robot from the multiple approaching area."""
     min_dis = 0
-    for i in range(len(approaching_area)):
+    for i, item in enumerate(approaching_area):
         if i == 0:
             min_dis = euclidean_distance(
                 robot_pose[0], robot_pose[1], approaching_area[i][0], approaching_area[i][1])

@@ -21,7 +21,7 @@ from typing import Any, Union
 from matplotlib import rc
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_modeling import plot_gaussians
-from matplotlib import rc
+
 
 
 SHOW_PLOT = True
@@ -97,10 +97,10 @@ def group_radius(persons, group_pose):
     ospace_radius = 0  # Based on the farthest persons to the group center
 
     sum_radius = 0
-    for i in range(len(persons)):
+    for person in persons:
         # average of the distance between the group members and the center of the group, o-space radius
-        distance = euclidean_distance(persons[i][0],
-                                      persons[i][1], group_pose[0], group_pose[1])
+        distance = euclidean_distance(person[0],
+                                      person[1], group_pose[0], group_pose[1])
         sum_radius += distance
 
         if ospace_radius == 0:

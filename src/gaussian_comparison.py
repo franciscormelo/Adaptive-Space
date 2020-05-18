@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 '''
-    File name: gaussian_modeling.py
+    File name: gaussian_comparison.py
     Author: Francisco Melo
     Mail: francisco.raposo.melo@tecnico.ulisboa.pt
     Date created: X/XX/XXXX
@@ -161,7 +161,7 @@ def plot_robot(pose, ax):
 
     draw_arrow(x, y, angle)  # orientation arrow angle in radians
     ax.plot(x, y, 'o', color='black', markersize=5)
-    return
+    
 
 
 def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):
@@ -349,4 +349,3 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     plt.close()
     del group_pos
     del ellipse_param
-
