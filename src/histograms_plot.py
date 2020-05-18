@@ -121,7 +121,7 @@ class Histogram:
         print("==================================================")
         input("Hit Enter To Close... ")
         plt.close()
-        pass
+        
 
 
 def main():
