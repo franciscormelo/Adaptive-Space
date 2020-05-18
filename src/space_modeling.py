@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import patches
 import math
-from ellipse import *
+from ellipse import plot_ellipse
 import statistics
 import sys
 from shapely.geometry.point import Point
@@ -21,7 +21,6 @@ from typing import Any, Union
 from matplotlib import rc
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_modeling import plot_gaussians
-
 
 
 SHOW_PLOT = True
@@ -324,8 +323,6 @@ def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax, perso
     approaching_x = [j[0] for j in approaching_filter]
     approaching_y = [k[1] for k in approaching_filter]
     ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
-
-    return
 
 
 class SpaceModeling:

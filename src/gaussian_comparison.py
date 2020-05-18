@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import math
-from ellipse import *
+from ellipse import plot_ellipse
 from matplotlib import rc
 
 from scipy.stats import multivariate_normal
@@ -38,7 +38,6 @@ LEVEL = 1
 #F_PSPACEY = 45
 F_PSPACEX = 80.0
 F_PSPACEY = 60.0
-
 
 
 def plot_person(x, y, angle, ax, plot_kwargs):
@@ -148,11 +147,12 @@ def draw_arrow(x, y, angle):  # angle in radians
 
 
 def plot_robot(pose, ax):
+    """Draws a robot from a top view."""
     x = pose[0]
     y = pose[1]
     angle = pose[2]
 
-    """Draws a robot from a top view."""
+
     top_y = HUMAN_Y / 2
     top_x = HUMAN_Y / 2
     plot_kwargs = {'color': 'black', 'linestyle': '-', 'linewidth': 1}
@@ -161,7 +161,6 @@ def plot_robot(pose, ax):
 
     draw_arrow(x, y, angle)  # orientation arrow angle in radians
     ax.plot(x, y, 'o', color='black', markersize=5)
-    
 
 
 def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):
@@ -198,7 +197,6 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     Z_A = np.empty([N, N])
 
-
     # plot using subplots
     fig, axs = plt.subplots(1, 2, sharey=False, tight_layout=True)
 
@@ -224,8 +222,6 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         Z1 = asymmetric_gaussian(
             pos, mu, sigma, person[2], (person[0], person[1]), N, sigma_back)
 
-
-
         # Z matrix only updates the values where Z1 > Z
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
@@ -234,7 +230,6 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     F_approaching_area = plot_group(
         group_pos, group_radius, pspace_radius, ospace_radius, axs[0])
-    
 
     show_group_space = True
     sigma = None
@@ -255,22 +250,21 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
-    cs1 = axs[0].contour(X,Y,Z_F,cmap="jet", linewidths=0.8, levels=10)
-
+    cs1 = axs[0].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
     F_approaching_filter = approaching_area_filtering(
         X_lin, Y_lin, F_approaching_area, cs1.allsegs[LEVEL][0])
     F_x_approach = [j[0] for j in F_approaching_filter]
     F_y_approach = [k[1] for k in F_approaching_filter]
-    
 
-    F_approaching_perimeter = (len(F_x_approach) * 2 * math.pi * group_radius)/len(F_approaching_area[0])
+    F_approaching_perimeter = (
+        len(F_x_approach) * 2 * math.pi * group_radius) / len(F_approaching_area[0])
     axs[0].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
-
 
     axs[0].set_xlabel(r'$x$ $[cm]$')
     axs[0].set_ylabel(r'$y$ $[cm]$')
-    axs[0].set_title(r'Adaptive Parameters - Perimeter =  %d $cm$' % F_approaching_perimeter)
+    axs[0].set_title(r'Adaptive Parameters - Perimeter =  %d $cm$' %
+                     F_approaching_perimeter)
     axs[0].set_aspect(aspect=1)
     ###########################################################################
     Z_F = np.empty([N, N])
@@ -290,7 +284,6 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         Z1 = asymmetric_gaussian(
             pos, mu, sigma, person[2], (person[0], person[1]), N, sigma_back)
 
-
         # Z matrix only updates the values where Z1 > Z
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
@@ -299,14 +292,13 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     F_approaching_area = plot_group(
         group_pos, group_radius, pspace_radius, ospace_radius, axs[1])
-    
 
     show_group_space = True
     sigma = None
     if show_group_space:
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
-        
+
         sigma = params_conversion(ospace_radius, ospace_radius, 0)
 
         Z1 = A * multivariate_gaussian(pos, mu, sigma)
@@ -320,25 +312,24 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
-    cs1 = axs[1].contour(X,Y,Z_F,cmap="jet", linewidths=0.8, levels=10)
-
+    cs1 = axs[1].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
     F_approaching_filter = approaching_area_filtering(
         X_lin, Y_lin, F_approaching_area, cs1.allsegs[LEVEL][0])
     F_x_approach = [j[0] for j in F_approaching_filter]
     F_y_approach = [k[1] for k in F_approaching_filter]
-    
 
-    F_approaching_perimeter = (len(F_x_approach) * 2 * math.pi * group_radius)/len(F_approaching_area[0])
+    F_approaching_perimeter = (
+        len(F_x_approach) * 2 * math.pi * group_radius) / len(F_approaching_area[0])
     axs[1].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
-
 
     axs[1].set_xlabel(r'$x$ $[cm]$')
     axs[1].set_ylabel(r'$y$ $[cm]$')
-    axs[1].set_title(r'Fixed Parameters - Perimeter =  %d $cm$' % F_approaching_perimeter)
+    axs[1].set_title(r'Fixed Parameters - Perimeter =  %d $cm$' %
+                     F_approaching_perimeter)
 
     ########################################################################
-    
+
     axs[1].set_aspect(aspect=1)
     fig.tight_layout()
     plt.show(block=False)

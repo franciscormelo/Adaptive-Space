@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import patches
 import math
-from ellipse import *
+from ellipse import plot_ellipse
 import statistics
 import sys
 from shapely.geometry.point import Point
@@ -21,7 +21,6 @@ from typing import Any, Union
 from matplotlib import rc
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_comparison import plot_gaussians
-
 
 
 SHOW_PLOT = True
@@ -47,6 +46,7 @@ INCREMENT = 1
 #F_PSPACEY = 45
 F_PSPACEX = 80
 F_PSPACEY = 60
+
 
 def euclidean_distance(x1, y1, x2, y2):
     """Euclidean distance between two points in 2D."""
@@ -330,8 +330,6 @@ def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax, perso
     approaching_y = [k[1] for k in approaching_filter]
     ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
 
-    
-
 
 class SpaceModeling:
     """Models the personal space, group space and estimates the possibles approaching areas."""
@@ -468,12 +466,13 @@ class SpaceModeling:
             plot_group(group_pose, group_radius, pspace_radius,
                        ospace_radius, ax, persons, sx, sy)
 
-            #Plot original personal space with fixed parameters
+            # Plot original personal space with fixed parameters
 
             plot_kwargs = {'color': 'b', 'linestyle': '-', 'linewidth': 0.8}
 
             for idx, person in enumerate(persons, start=1):
-                personal_space = draw_personalspace( person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY,plot_kwargs, idx)  # plot using ellipse.py functions
+                personal_space = draw_personalspace(
+                    person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY, plot_kwargs, idx)  # plot using ellipse.py functions
 
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
@@ -536,10 +535,11 @@ def main():
                     f, ax = plt.subplots(1)
                     plot_group(app.group_data['group_pose'][idx], app.group_data['group_radius'][idx], app.group_data['pspace_radius'][idx], app.group_data['ospace_radius'][idx], ax,
                                app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
-                    plot_kwargs = {'color': 'b', 'linestyle': '-', 'linewidth': 0.8}
-                    for k, person in enumerate( app.persons[idx], start=1):
-                        personal_space = draw_personalspace( person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY,plot_kwargs, k)  # plot using ellipse.py functions
-
+                    plot_kwargs = {'color': 'b',
+                                   'linestyle': '-', 'linewidth': 0.8}
+                    for k, person in enumerate(app.persons[idx], start=1):
+                        personal_space = draw_personalspace(
+                            person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY, plot_kwargs, k)  # plot using ellipse.py functions
 
                     plt.rc('text', usetex=True)
                     plt.rc('font', family='serif')

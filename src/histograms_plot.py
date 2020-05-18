@@ -45,10 +45,9 @@ class Histogram:
             self.group_info['param_x'].append(float(params_xy[0]))
             self.group_info['param_y'].append(float(params_xy[1]))
 
-
     def to_percent(y, position):
-    # Ignore the passed in position. This has the effect of scaling the default
-    # tick locations.
+        # Ignore the passed in position. This has the effect of scaling the default
+        # tick locations.
     s = str(100 * y)
 
     # The percent symbol needs escaping in latex
@@ -56,7 +55,6 @@ class Histogram:
         return s + r'$\%$'
     else:
         return s + '%'
-        
 
     def solve(self, number_elements):
         """ Plots Histogram of x and y parameters of personal space"""
@@ -93,13 +91,12 @@ class Histogram:
         fig2, axs2 = plt.subplots(1, 2, sharey=False, tight_layout=True)
         g_x = []
         g_y = []
-        
+
         for i in range(len(self.group_info['group_nb'])):
 
             if self.group_info['group_nb'][i] == number_elements:
                 g_x.append(self.group_info['param_x'][i])
                 g_y.append(self.group_info['param_y'][i])
-                
 
         axs2[0].hist([g_x, g_y], bins='auto', label=['x', 'y'],
                      alpha=0.7, rwidth=0.85)

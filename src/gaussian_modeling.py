@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import math
-from ellipse import *
+from ellipse import plot_ellipse
 from matplotlib import rc
 
 from scipy.stats import multivariate_normal
@@ -96,14 +96,14 @@ def asymmetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
                                                     0] - center[0]) - orientation + (math.pi / 2)
 
     # Front gaussian
-    #aux1 = (cond + np.pi) % (2 * np.pi) - np.pi > 0
+    # aux1 = (cond + np.pi) % (2 * np.pi) - np.pi > 0
     # Compute the nor- malized angle of the line
     aux1 = np.arctan2(np.sin(cond), np.cos(cond)) > 0
     pos1 = pos[:, :][aux1]
     Z1[aux1] = multivariate_gaussian(pos1, mu, Sigma)
 
     # Back Gaussian
-    #aux2 = (cond + np.pi) % (2 * np.pi) - np.pi <= 0
+    # aux2 = (cond + np.pi) % (2 * np.pi) - np.pi <= 0
     # Compute the nor- malized angle of the line
     aux2 = np.arctan2(np.sin(cond), np.cos(cond)) <= 0
     pos2 = pos[:, :][aux2]
@@ -144,7 +144,7 @@ def plot_robot(pose, ax):
     y = pose[1]
     angle = pose[2]
 
-   
+
     top_y = HUMAN_Y / 2
     top_x = HUMAN_Y / 2
     plot_kwargs = {'color': 'black', 'linestyle': '-', 'linewidth': 1}
@@ -153,7 +153,7 @@ def plot_robot(pose, ax):
 
     draw_arrow(x, y, angle)  # orientation arrow angle in radians
     ax.plot(x, y, 'o', color='black', markersize=5)
-    
+
 
 
 def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):
@@ -212,8 +212,8 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         Z1 = asymmetric_gaussian(
             pos, mu, Sigma, person[2], (person[0], person[1]), N, Sigma_back)
 
-        #Z1 = multivariate_normal(mu, Sigma).pdf(pos)
-        #Z = Z1
+        # Z1 = multivariate_normal(mu, Sigma).pdf(pos)
+        # Z = Z1
 
         # Z matrix only updates the values where Z1 > Z
         cond = Z1 > Z
@@ -253,7 +253,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     ax1.set_zlabel(r'Cost')
 
     cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
-    #cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
+    # cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)
     fig.colorbar(cs)
 
     # Approaching Area filtering - remove points that are inside the personal space of a person
@@ -266,13 +266,13 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
    # robot_pose = [0, 0, 3.14]
     # Plots robot from top view
    # plot_robot(robot_pose, ax2)
-    #ax2.annotate("Robot_Initial", (robot_pose[0], robot_pose[1]))
+    # ax2.annotate("Robot_Initial", (robot_pose[0], robot_pose[1]))
 
     # Estimates the goal pose for the robot to approach the group
-    #goal_pose = approaching_pose(robot_pose, approaching_filter, group_pos)
-    #print("Goal Pose (cm,cm,rad) = " + str(goal_pose))
-    #plot_robot(goal_pose, ax2)
-    #ax2.annotate("Robot_Goal", (goal_pose[0], goal_pose[1]))
+    # goal_pose = approaching_pose(robot_pose, approaching_filter, group_pos)
+    # print("Goal Pose (cm,cm,rad) = " + str(goal_pose))
+    # plot_robot(goal_pose, ax2)
+    # ax2.annotate("Robot_Goal", (goal_pose[0], goal_pose[1]))
     ax2.set_xlabel(r'$x$ $[cm]$')
     ax2.set_ylabel(r'$y$ $[cm]$')
     ax2.set_aspect(aspect=1)

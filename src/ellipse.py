@@ -89,7 +89,7 @@ def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3,
     data[1] += y_cent  # Translation in y
 
     # Output data?
-    if data_out == True:
+    if data_out:
         return data
 
     # Plot!
