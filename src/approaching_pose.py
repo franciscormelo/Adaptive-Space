@@ -92,10 +92,10 @@ def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_fi
                 approaching_area, contour_points)
 
             approaching_radius += R_STEP
-        return approaching_filter, approaching_zones
+        
 
-    else:
-        return approaching_filter, approaching_zones
+    
+    return approaching_filter, approaching_zones
 
 
 def zones_center(approaching_zones, group_pos):
