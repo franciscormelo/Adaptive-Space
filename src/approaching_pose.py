@@ -14,6 +14,15 @@ from scipy import spatial
 
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
+from ellipse import plot_ellipse
+
+# Radius increment in cm
+R_STEP = 1
+
+
+def get_angle(pos1, pos2):
+    "Angle between two points"
+    return math.atan2(pos1[1] - pos2[1], pos1[0] - pos2[0])
 
 
 def euclidean_distance(x1, y1, x2, y2):
@@ -36,17 +45,71 @@ def approachingfiltering_ellipses(personal_space, approaching_filter, idx):
     return approaching_filter
 
 
-def approaching_area_filtering(x, y, approaching_area, contour_points):
+def approaching_area_filtering(approaching_area, contour_points):
     """ Filters the approaching area by checking the points where the cost is zero."""
 
     cx = [j[0] for j in contour_points]
     cy = [k[1] for k in contour_points]
     polygon = Polygon(contour_points)
 
-    approaching_filter = [(x, y) for x, y in zip(
-        approaching_area[0], approaching_area[1]) if not polygon.contains(Point([x, y]))]
+    # approaching_filter = [(x, y) for x, y in zip(
+    #     approaching_area[0], approaching_area[1]) if not polygon.contains(Point([x, y]))]
+    approaching_filter = []
+    approaching_zones = []
+    aux_list = []
 
-    return approaching_filter
+    flag = False
+
+    for x, y in zip(approaching_area[0], approaching_area[1]):
+        if not polygon.contains(Point([x, y])):
+            flag = True
+            approaching_filter.append((x, y))
+            aux_list.append((x, y))
+        else:
+            if flag:
+                approaching_zones.append(aux_list)
+                aux_list = []
+                flag = False
+
+    return approaching_filter, approaching_zones
+
+
+def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_filter, contour_points, approaching_zones):
+    """ """
+
+    approaching_radius = group_radius
+    approaching_radius += R_STEP
+    if not approaching_filter:
+        while not approaching_filter and approaching_radius <= pspace_radius:
+
+            approaching_area = None
+            approaching_filter = None
+            approaching_zones = None
+
+            approaching_area = plot_ellipse(
+                semimaj=approaching_radius, semimin=approaching_radius, x_cent=group_pos[0], y_cent=group_pos[1], data_out=True)
+            approaching_filter, approaching_zones = approaching_area_filtering(
+                approaching_area, contour_points)
+
+            approaching_radius += R_STEP
+        return approaching_filter, approaching_zones
+
+    else:
+        return approaching_filter, approaching_zones
+
+
+def zones_center(approaching_zones, group_pos):
+    """ """
+    center_x = []
+    center_y = []
+    orientation = []
+    for zone in approaching_zones:
+        idx = int(len(zone) / 2)
+        center_x.append(zone[idx][0])
+        center_y.append(zone[idx][1])
+        orientation.append(get_angle(group_pos, (zone[idx][0], zone[idx][1])))
+
+    return center_x, center_y, orientation
 
 
 def approaching_pose(robot_pose, approaching_area, group_center):

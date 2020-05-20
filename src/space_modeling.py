@@ -60,11 +60,11 @@ def rotate(px, py, angle):
     return qx, qy
 
 
-def draw_arrow(x, y, angle):  # angle in radians
+def draw_arrow(x, y, angle, ax):  # angle in radians
     """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
-    plt.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
-              head_length=1, head_width=1, shape='full', color='blue')
+    ax.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
+             head_length=1, head_width=1, shape='full', color='blue')
 
 
 def draw_person_top(x, y, angle, ax):
@@ -77,7 +77,7 @@ def draw_person_top(x, y, angle, ax):
 
 def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
     """Draws personal space of an inidivdual and it."""
-    draw_arrow(x, y, angle)  # orientation arrow angle in radians
+    draw_arrow(x, y, angle, ax)  # orientation arrow angle in radians
     ax.plot(x, y, 'bo', markersize=8)
     draw_person_top(x, y, angle, ax)
     ax.text(x + 3, y + 3, "$P_" + str(idx) + "$", fontsize=12)

@@ -131,29 +131,27 @@ def params_conversion(sx, sy, angle):
     return covariance
 
 
-def draw_arrow(x, y, angle):  # angle in radians
+def draw_arrow(x, y, angle, ax):  # angle in radians
     """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
-    plt.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
-              head_length=1, head_width=1, shape='full', color='black')
+    ax.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
+             head_length=1, head_width=1, shape='full', color='black')
 
 
 def plot_robot(pose, ax):
-     """Draws a robot from a top view."""
+    """Draws a robot from a top view."""
     x = pose[0]
     y = pose[1]
+
     angle = pose[2]
-
-
     top_y = HUMAN_Y / 2
     top_x = HUMAN_Y / 2
     plot_kwargs = {'color': 'black', 'linestyle': '-', 'linewidth': 1}
     plot_ellipse(semimaj=top_x, semimin=top_y,
                  phi=angle, x_cent=x, y_cent=y, ax=ax, plot_kwargs=plot_kwargs)
 
-    draw_arrow(x, y, angle)  # orientation arrow angle in radians
+    draw_arrow(x, y, angle, ax)  # orientation arrow angle in radians
     ax.plot(x, y, 'o', color='black', markersize=5)
-
 
 
 def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):
@@ -176,10 +174,9 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     ymin = min(y) - 150
     ymax = max(y) + 150
 
-    X_lin = np.linspace(xmin, xmax, N)
-    Y_lin = np.linspace(ymin, ymax, N)
-    X = X_lin
-    Y = Y_lin
+    X = np.linspace(xmin, xmax, N)
+    Y = np.linspace(ymin, ymax, N)
+
     X, Y = np.meshgrid(X, Y)
 
     # Pack X and Y into a single 3-dimensional array
@@ -229,7 +226,6 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
 
-
         Sigma = params_conversion(ospace_radius, ospace_radius, 0)
 
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
@@ -257,11 +253,19 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     fig.colorbar(cs)
 
     # Approaching Area filtering - remove points that are inside the personal space of a person
-    approaching_filter = approaching_area_filtering(
-        X_lin, Y_lin, approaching_area, cs.allsegs[LEVEL][0])
+    approaching_filter, approaching_zones = approaching_area_filtering(
+        approaching_area, cs.allsegs[LEVEL][0])
+
     x_approach = [j[0] for j in approaching_filter]
     y_approach = [k[1] for k in approaching_filter]
     ax2.plot(x_approach, y_approach, 'c.', markersize=5)
+
+    center_x, center_y, orientation = zones_center(
+        approaching_zones, group_pos)
+    ax2.plot(center_x, center_y, 'r.', markersize=5)
+
+    for i, angle in enumerate(orientation):
+        draw_arrow(center_x[i], center_y[i], angle, ax2)
 
    # robot_pose = [0, 0, 3.14]
     # Plots robot from top view
