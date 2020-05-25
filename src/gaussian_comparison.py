@@ -9,17 +9,12 @@
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
-from mpl_toolkits.mplot3d import Axes3D
 import math
 from ellipse import plot_ellipse
-from matplotlib import rc
 
 from scipy.stats import multivariate_normal
 
-from approaching_pose import *
-
-import sys
+from approaching_pose import zones_center, approaching_heuristic, approaching_area_filtering
 
 
 # CONSTANTS
@@ -34,8 +29,8 @@ BACK_FACTOR = 1.3
 LEVEL = 1
 
 # DSZ PARAMETERS in cm
-F_PSPACEX = 37
-F_PSPACEY = 37
+F_PSPACEX = 54
+F_PSPACEY = 45
 # F_PSPACEX = 80.0
 # F_PSPACEY = 60.0
 
@@ -76,6 +71,7 @@ def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax):
                                     y_cent=group_pose[1], data_out=True)
     return approaching_area
 
+
 def multivariate_gaussian(pos, mu, sigma):
     """Return the multivariate Gaussian distribution on array pos."""
     # Adapted from: https://stackoverflow.com/questions/28342968/how-to-plot-a-2d-gaussian-with-different-sigma
@@ -96,7 +92,6 @@ def asymmetric_gaussian(pos, mu, sigma, orientation, center, N, sigma_back):
     """ Computes an asymmetric  2D gaussian function using a function for the frontal part and another one for the back part"""
     Z1 = np.zeros([N, N])
     Z2 = np.zeros([N, N])
-    angle = orientation + math.pi / 2
 
     # # Based on Kirby phd thesis
     cond = np.arctan2(pos[:, :, 1] - center[1], pos[:, :,
@@ -138,11 +133,11 @@ def params_conversion(sx, sy, angle):
     return covariance
 
 
-def draw_arrow(x, y, angle,ax):  # angle in radians
+def draw_arrow(x, y, angle, ax):  # angle in radians
     """Draws an arrow given a pose."""
     r = 10  # or whatever fits you
     ax.arrow(x, y, r * math.cos(angle), r * math.sin(angle),
-              head_length=1, head_width=1, shape='full', color='black')
+             head_length=1, head_width=1, shape='full', color='black')
 
 
 def plot_robot(pose, ax):
@@ -151,18 +146,17 @@ def plot_robot(pose, ax):
     y = pose[1]
     angle = pose[2]
 
-
     top_y = HUMAN_Y / 2
     top_x = HUMAN_Y / 2
     plot_kwargs = {'color': 'black', 'linestyle': '-', 'linewidth': 1}
     plot_ellipse(semimaj=top_x, semimin=top_y,
                  phi=angle, x_cent=x, y_cent=y, ax=ax, plot_kwargs=plot_kwargs)
 
-    draw_arrow(x, y, angle,ax)  # orientation arrow angle in radians
+    draw_arrow(x, y, angle, ax)  # orientation arrow angle in radians
     ax.plot(x, y, 'o', color='black', markersize=5)
 
 
-def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):
+def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True, plot=True):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters."""
 
     group_radius = group_data['group_radius'][idx]
@@ -183,17 +177,15 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     ymin = min(y) - 150
     ymax = max(y) + 150
 
-    X= np.linspace(xmin, xmax, N)
-    Y= np.linspace(ymin, ymax, N)
+    X = np.linspace(xmin, xmax, N)
+    Y = np.linspace(ymin, ymax, N)
 
     X, Y = np.meshgrid(X, Y)
 
     # Pack X and Y into a single 3-dimensional array
-    pos = np.empty(X.shape + (2,))
+    pos = np.zeros(X.shape + (2,))
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
-
-    Z_A = np.empty([N, N])
 
     # plot using subplots
     fig, axs = plt.subplots(1, 2, sharey=False, tight_layout=True)
@@ -201,13 +193,12 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
     # Personal Space as gaussian for each person in the group
 
-    Z_F = np.empty([N, N])
+    Z_F = np.zeros([N, N])
 
     for person in persons:
         sigma = None
         sigma_back = None
         Z1 = None
-        mu = np.array([person[0], person[1]])
         mu = np.array([person[0], person[1]])
 
         sigma = params_conversion(
@@ -221,6 +212,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
             pos, mu, sigma, person[2], (person[0], person[1]), N, sigma_back)
 
         # Z matrix only updates the values where Z1 > Z
+        cond = None
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
@@ -245,12 +237,14 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         Z1 = A1 * Z1
 
         # Z matrix only updates the values where Z1 > Z
+        cond = None
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
     cs1 = axs[0].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
-    F_approaching_filter, F_approaching_zones = approaching_area_filtering(F_approaching_area, cs1.allsegs[LEVEL][0])
+    F_approaching_filter, F_approaching_zones = approaching_area_filtering(
+        F_approaching_area, cs1.allsegs[LEVEL][0])
     F_x_approach = [j[0] for j in F_approaching_filter]
     F_y_approach = [k[1] for k in F_approaching_filter]
 
@@ -258,13 +252,12 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         len(F_x_approach) * 2 * math.pi * group_radius) / len(F_approaching_area[0])
     axs[0].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
 
-    F_center_x, F_center_y,F_orientation = zones_center(F_approaching_zones,group_pos)
+    F_center_x, F_center_y, F_orientation = zones_center(
+        F_approaching_zones, group_pos)
     axs[0].plot(F_center_x, F_center_y, 'r.', markersize=5)
-    
+
     for i, angle in enumerate(F_orientation):
-        draw_arrow(F_center_x[i], F_center_y[i], angle,axs[0])
-
-
+        draw_arrow(F_center_x[i], F_center_y[i], angle, axs[0])
 
     axs[0].set_xlabel(r'$x$ $[cm]$')
     axs[0].set_ylabel(r'$y$ $[cm]$')
@@ -272,7 +265,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
                      F_approaching_perimeter)
     axs[0].set_aspect(aspect=1)
     ###########################################################################
-    Z_F = np.empty([N, N])
+    Z_F = np.zeros([N, N])
 
     for person in persons:
         sigma = None
@@ -290,6 +283,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
             pos, mu, sigma, person[2], (person[0], person[1]), N, sigma_back)
 
         # Z matrix only updates the values where Z1 > Z
+        cond = None
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
@@ -314,16 +308,17 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         Z1 = A1 * Z1
 
         # Z matrix only updates the values where Z1 > Z
+        cond = None
         cond = Z1 > Z_F
         Z_F[cond] = Z1[cond]
 
     cs1 = axs[1].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
-    F_approaching_filter, F_approaching_zones = approaching_area_filtering(F_approaching_area, cs1.allsegs[LEVEL][0])
+    F_approaching_filter, F_approaching_zones = approaching_area_filtering(
+        F_approaching_area, cs1.allsegs[LEVEL][0])
 
-    H_approaching_filter, H_approaching_zones = approaching_heuristic(group_radius,pspace_radius, group_pos, F_approaching_filter,cs1.allsegs[LEVEL][0], F_approaching_zones )
-
-   
+    H_approaching_filter, H_approaching_zones = approaching_heuristic(
+        group_radius, pspace_radius, group_pos, F_approaching_filter, cs1.allsegs[LEVEL][0], F_approaching_zones)
 
     H_x_approach = [j[0] for j in H_approaching_filter]
     H_y_approach = [k[1] for k in H_approaching_filter]
@@ -333,12 +328,12 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     axs[1].plot(H_x_approach, H_y_approach, 'c.', markersize=5)
 
-    H_center_x, H_center_y, H_orientation = zones_center(H_approaching_zones, group_pos)
+    H_center_x, H_center_y, H_orientation = zones_center(
+        H_approaching_zones, group_pos)
     axs[1].plot(H_center_x, H_center_y, 'r.', markersize=5)
 
     for i, angle in enumerate(H_orientation):
-        draw_arrow(H_center_x[i], H_center_y[i], angle,axs[1])
-
+        draw_arrow(H_center_x[i], H_center_y[i], angle, axs[1])
 
     axs[1].set_xlabel(r'$x$ $[cm]$')
     axs[1].set_ylabel(r'$y$ $[cm]$')
@@ -349,11 +344,11 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     axs[1].set_aspect(aspect=1)
     fig.tight_layout()
-    plt.show(block=False)
-    print("==================================================")
-    input("Hit Enter To Close... ")
-    plt.cla()
-    plt.clf()
-    plt.close()
-    del group_pos
-    del ellipse_param
+    if plot:
+        plt.show(block=False)
+        print("==================================================")
+        input("Hit Enter To Close... ")
+        plt.cla()
+        plt.clf()
+        plt.close()
+    return F_approaching_perimeter, H_approaching_perimeter

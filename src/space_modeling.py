@@ -12,13 +12,9 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 import math
 from ellipse import plot_ellipse
-import statistics
 import sys
 from shapely.geometry.point import Point
-from matplotlib.patches import Polygon
 from shapely import affinity
-from typing import Any, Union
-from matplotlib import rc
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_modeling import plot_gaussians
 
@@ -30,7 +26,7 @@ SHOW_PLOT = True
 HUMAN_Y = 45
 HUMAN_X = 20
 
-# Personal Space Maximum 45 - 120 cm
+# Personal Space Maximum 45 - 120 cm - Initial Parameters
 PSPACEX = 80.0
 PSPACEY = 60.0
 
@@ -146,7 +142,6 @@ def create_shapely_ellipse(center, lengths, angle=0):
     ellr = affinity.rotate(ell, angle)
     return ellr
 
-
 def minimum_personalspace(sx, sy):
     """Checks if the parameters are at least the human body dimensions."""
     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
@@ -229,11 +224,11 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         sx = area1 / (math.pi * sy)
 
     elif sigmax <= HUMAN_X / 2:  # If one of the parameters is already a minimum value, we fix the paramter and determine the other
-        sy = rea1 / (math.pi * sx)
+        sx = HUMAN_X / 2
+        sy = area1 / (math.pi * sx)
     else:
 
         sx = math.sqrt((area1 * PFACTOR) / math.pi)
-
         sy = sx / PFACTOR
 
     return sx, sy
@@ -268,7 +263,6 @@ def calc_o_space(persons):
     """Calculates the o-space center of the group given group members pose"""
     c_x = 0
     c_y = 0
-    o_sp_radius = 0
 
     # Group size
     g_size = len(persons)
@@ -473,7 +467,7 @@ class SpaceModeling:
         plt.close()
 
     def write_params(self, fw):
-        "Writes in a file the parameters of the personal space for each group."
+        """Writes in a file the parameters of the personal space for each group."""
         fw.write("Nb of members - (Sx,Sy)\n")
         for i in range(len(self.pspace_param)):
             fw.write(str(self.group_data['group_nb'][i]) + "-"

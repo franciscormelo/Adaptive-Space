@@ -9,15 +9,15 @@
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import cm
+
 from mpl_toolkits.mplot3d import Axes3D
 import math
 from ellipse import plot_ellipse
-from matplotlib import rc
+
 
 from scipy.stats import multivariate_normal
 
-from approaching_pose import *
+from approaching_pose import zones_center, approaching_area_filtering
 
 
 # CONSTANTS
@@ -89,7 +89,6 @@ def asymmetric_gaussian(pos, mu, Sigma, orientation, center, N, Sigma_back):
     """ Computes an asymmetric  2D gaussian function using a function for the frontal part and another one for the back part"""
     Z1 = np.zeros([N, N])
     Z2 = np.zeros([N, N])
-    angle = orientation + math.pi / 2
 
     # # Based on Kirby phd thesis
     cond = np.arctan2(pos[:, :, 1] - center[1], pos[:, :,
@@ -180,11 +179,11 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     X, Y = np.meshgrid(X, Y)
 
     # Pack X and Y into a single 3-dimensional array
-    pos = np.empty(X.shape + (2,))
+    pos = np.zeros(X.shape + (2,))
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
 
-    Z = np.empty([N, N])
+    Z = np.zeros([N, N])
 
     # plot using subplots
     fig = plt.figure()

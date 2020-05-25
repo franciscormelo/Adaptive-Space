@@ -12,13 +12,9 @@ import matplotlib.pyplot as plt
 from matplotlib import patches
 import math
 from ellipse import plot_ellipse
-import statistics
 import sys
 from shapely.geometry.point import Point
-from matplotlib.patches import Polygon
 from shapely import affinity
-from typing import Any, Union
-from matplotlib import rc
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_comparison import plot_gaussians
 
@@ -31,8 +27,10 @@ HUMAN_Y = 45
 HUMAN_X = 20
 
 # Personal Space Maximum 45 - 120 cm
-PSPACEX = 80.0
-PSPACEY = 60.0
+# PSPACEX = 80.0
+# PSPACEY = 60.0
+PSPACEX = 54  # DSZ parameters
+PSPACEY = 45
 
 STRIDE = 65
 
@@ -42,8 +40,8 @@ PFACTOR = PSPACEX / PSPACEY
 INCREMENT = 1
 
 # DSZ PARAMETERS in cm
-F_PSPACEX = 37
-F_PSPACEY = 37
+F_PSPACEX = 54
+F_PSPACEY = 45
 # F_PSPACEX = 80
 # F_PSPACEY = 60
 
@@ -235,7 +233,8 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         sx = area1 / (math.pi * sy)
 
     elif sigmax <= HUMAN_X / 2:  # If one of the parameters is already a minimum value, we fix the paramter and determine the other
-        sy = rea1 / (math.pi * sx)
+        sx = HUMAN_X / 2
+        sy = area1 / (math.pi * sx)
     else:
 
         sx = math.sqrt((area1 * PFACTOR) / math.pi)
@@ -274,7 +273,6 @@ def calc_o_space(persons):
     """Calculates the o-space center of the group given group members pose"""
     c_x = 0
     c_y = 0
-    o_sp_radius = 0
 
     # Group size
     g_size = len(persons)
@@ -395,9 +393,22 @@ class SpaceModeling:
             self.group_data['ospace_radius'].append(ospace_radius)
             self.group_data['pspace_radius'].append(pspace_radius)
 
-            #
-            # codigo calculo p space e o space numa funcao.
-            #
+    def write_params(self, fw):
+        "Writes in a file the parameters of the personal space for each group."
+        fw.write("Nb of members - (Sx,Sy)\n")
+        for i in range(len(self.pspace_param)):
+            fw.write(str(self.group_data['group_nb'][i]) + "-" +
+                     "(" + str(self.pspace_param[i][0]) + "," + str(self.pspace_param[i][1]) + ")\n")
+
+    def write_perimeter(self, fw, fixed_perimeter, adaptive_perimeter):
+        "Writes in a file the perimeter of each group using fixed and adaptive parameters"
+        fw.write("Initial parameters - (" + str(PSPACEX) +
+                 "," + str(PSPACEY) + ") cm\n")
+        fw.write(
+            "Number of elements - (Adaptive perimeter (cm) , Fixed perimeter(cm))\n")
+        for i in range(len(self.pspace_param)):
+            fw.write(str(self.group_data['group_nb'][i]) + "-" + "(" + str(
+                adaptive_perimeter[i]) + "," + str(fixed_perimeter[i]) + ")\n")
 
     def solve(self):
         """ Estimates the personal space and group space."""
@@ -471,7 +482,7 @@ class SpaceModeling:
             plot_kwargs = {'color': 'b', 'linestyle': '-', 'linewidth': 0.8}
 
             for idx, person in enumerate(persons, start=1):
-                personal_space = draw_personalspace(
+                draw_personalspace(
                     person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY, plot_kwargs, idx)  # plot using ellipse.py functions
 
         plt.rc('text', usetex=True)
@@ -486,13 +497,6 @@ class SpaceModeling:
             print("==================================================")
             input("Hit Enter To Close... ")
         plt.close()
-
-    def write_params(self, fw):
-        "Writes in a file the parameters of the personal space for each group."
-        fw.write("Nb of members - (Sx,Sy)\n")
-        for i in range(len(self.pspace_param)):
-            fw.write(str(self.group_data['group_nb'][i]) + "-"
-                     "(" + str(self.pspace_param[i][0]) + "," + str(self.pspace_param[i][1]) + ")\n")
 
 
 def main():
@@ -538,7 +542,7 @@ def main():
                     plot_kwargs = {'color': 'b',
                                    'linestyle': '-', 'linewidth': 0.8}
                     for k, person in enumerate(app.persons[idx], start=1):
-                        personal_space = draw_personalspace(
+                        draw_personalspace(
                             person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY, plot_kwargs, k)  # plot using ellipse.py functions
 
                     plt.rc('text', usetex=True)
@@ -586,9 +590,22 @@ def main():
                 if number <= len(app.group_data['group_nb']) and number > 0:
                     idx = number - 1
 
-                    plot_gaussians(
+                    aperim, fperim = plot_gaussians(
                         app.persons[idx], app.group_data, idx, app.pspace_param[idx])
+                    # aperim = []
+                    # fperim= []
 
+                    # for idx,group_persons in enumerate(app.persons):
+                    #     print(group_persons)
+                    #     print("#####")
+                    #     ap,fp = compute_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx])
+                    #     aperim.append(ap)
+                    #     fperim.append(fp)
+
+                    # # Writes the parameters of the personal space for each group
+                    # pfile = open("data/groups_perimeter.txt", "w+")
+                    # app.write_perimeter(pfile,fperim,aperim)
+                    # pfile.close()
                 else:
                     print("Invalid group number.")
                     print()

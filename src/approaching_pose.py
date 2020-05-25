@@ -10,8 +10,6 @@
 
 import math
 
-from scipy import spatial
-
 from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 from ellipse import plot_ellipse
@@ -48,8 +46,6 @@ def approachingfiltering_ellipses(personal_space, approaching_filter, idx):
 def approaching_area_filtering(approaching_area, contour_points):
     """ Filters the approaching area by checking the points where the cost is zero."""
 
-    cx = [j[0] for j in contour_points]
-    cy = [k[1] for k in contour_points]
     polygon = Polygon(contour_points)
 
     # approaching_filter = [(x, y) for x, y in zip(
@@ -92,9 +88,7 @@ def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_fi
                 approaching_area, contour_points)
 
             approaching_radius += R_STEP
-        
 
-    
     return approaching_filter, approaching_zones
 
 
