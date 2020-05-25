@@ -233,6 +233,7 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         sx = area1 / (math.pi * sy)
 
     elif sigmax <= HUMAN_X / 2:  # If one of the parameters is already a minimum value, we fix the paramter and determine the other
+        sx = HUMAN_X / 2
         sy = area1 / (math.pi * sx)
     else:
 

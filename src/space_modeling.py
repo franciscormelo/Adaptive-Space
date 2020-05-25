@@ -142,7 +142,6 @@ def create_shapely_ellipse(center, lengths, angle=0):
     ellr = affinity.rotate(ell, angle)
     return ellr
 
-
 def minimum_personalspace(sx, sy):
     """Checks if the parameters are at least the human body dimensions."""
     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
@@ -225,11 +224,11 @@ def parameters_computation(person1, person2, sigmax=PSPACEX, sigmay=PSPACEY):
         sx = area1 / (math.pi * sy)
 
     elif sigmax <= HUMAN_X / 2:  # If one of the parameters is already a minimum value, we fix the paramter and determine the other
+        sx = HUMAN_X / 2
         sy = area1 / (math.pi * sx)
     else:
 
         sx = math.sqrt((area1 * PFACTOR) / math.pi)
-
         sy = sx / PFACTOR
 
     return sx, sy
@@ -468,7 +467,7 @@ class SpaceModeling:
         plt.close()
 
     def write_params(self, fw):
-        "Writes in a file the parameters of the personal space for each group."
+        """Writes in a file the parameters of the personal space for each group."""
         fw.write("Nb of members - (Sx,Sy)\n")
         for i in range(len(self.pspace_param)):
             fw.write(str(self.group_data['group_nb'][i]) + "-"

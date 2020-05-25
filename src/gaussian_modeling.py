@@ -179,11 +179,11 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     X, Y = np.meshgrid(X, Y)
 
     # Pack X and Y into a single 3-dimensional array
-    pos = np.empty(X.shape + (2,))
+    pos = np.zeros(X.shape + (2,))
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
 
-    Z = np.empty([N, N])
+    Z = np.zeros([N, N])
 
     # plot using subplots
     fig = plt.figure()

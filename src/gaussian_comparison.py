@@ -183,7 +183,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     X, Y = np.meshgrid(X, Y)
 
     # Pack X and Y into a single 3-dimensional array
-    pos = np.empty(X.shape + (2,))
+    pos = np.zeros(X.shape + (2,))
     pos[:, :, 0] = X
     pos[:, :, 1] = Y
 
@@ -193,7 +193,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
     # Personal Space as gaussian for each person in the group
 
-    Z_F = np.empty([N, N])
+    Z_F = np.zeros([N, N])
 
     for person in persons:
         sigma = None
@@ -265,7 +265,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
                      F_approaching_perimeter)
     axs[0].set_aspect(aspect=1)
     ###########################################################################
-    Z_F = np.empty([N, N])
+    Z_F = np.zeros([N, N])
 
     for person in persons:
         sigma = None
@@ -351,11 +351,4 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
         plt.cla()
         plt.clf()
         plt.close()
-    group_pos = None
-    group_radius = None
-    Z_F = None
-    Z1 = None
-    cond = None
-    persons = None
-
     return F_approaching_perimeter, H_approaching_perimeter
