@@ -596,13 +596,11 @@ def main():
                     # fperim= []
 
                     # for idx,group_persons in enumerate(app.persons):
-                    #     print(group_persons)
-                    #     print("#####")
-                    #     ap,fp = compute_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx])
+                    #     ap,fp = plot_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx], plot = False)
                     #     aperim.append(ap)
                     #     fperim.append(fp)
 
-                    # # Writes the parameters of the personal space for each group
+                    # Writes the parameters of the personal space for each group
                     # pfile = open("data/groups_perimeter.txt", "w+")
                     # app.write_perimeter(pfile,fperim,aperim)
                     # pfile.close()
