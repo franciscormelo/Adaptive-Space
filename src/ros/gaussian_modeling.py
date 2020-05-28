@@ -288,8 +288,8 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, N=200, show_grou
     # plt.clf()
     # plt.close()
     approaching_poses = []
-    for idx, value in enumerate(center_x):
+    for l, value in enumerate(center_x):
         approaching_poses.append(
-            (center_x[idx], center_y[idx], orientation[idx]))
+            (center_x[l], center_y[l], orientation[l]))
 
     return approaching_poses
