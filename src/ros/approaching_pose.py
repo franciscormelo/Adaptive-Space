@@ -54,26 +54,26 @@ def approaching_area_filtering(approaching_area, contour_points):
     approaching_zones = []
     aux_list = []
     limit_points = []
-    
+
     for x, y in zip(approaching_area[0], approaching_area[1]):
         if not polygon.contains(Point([x, y])):
             if not aux_list:
-                limit_points.append((x,y,"s"))
-                
+                limit_points.append((x, y, "s"))
+
             approaching_filter.append((x, y))
             aux_list.append((x, y))
-            
-            prev = (x,y,"e")
-            
+
+            prev = (x, y, "e")
+
         else:
-           
+
             if not aux_list:
-                pass       
+                pass
             else:
                 approaching_zones.append(aux_list)
                 aux_list = []
                 limit_points.append(prev)
-                 
+
     return approaching_filter, approaching_zones, limit_points[1:]
 
 
@@ -99,7 +99,7 @@ def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_fi
     return approaching_filter, approaching_zones
 
 
-def zones_center(approaching_zones, group_pos,group_radius, limit_points):
+def zones_center(approaching_zones, group_pos, group_radius, limit_points):
     """ """
     # https://stackoverflow.com/questions/26951544/algorithm-find-the-midpoint-of-an-arc
     center_x = []
@@ -110,8 +110,7 @@ def zones_center(approaching_zones, group_pos,group_radius, limit_points):
         center_x.append(zone[idx][0])
         center_y.append(zone[idx][1])
         orientation.append(get_angle(group_pos, (zone[idx][0], zone[idx][1])))
-        
-    
+
     return center_x, center_y, orientation
 
 

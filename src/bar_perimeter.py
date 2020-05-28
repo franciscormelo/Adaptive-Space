@@ -54,37 +54,34 @@ class Bar:
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
                         ha='center', va='bottom')
+
     def sum_perimeter(self):
         """ Return the sum of perimeter of all groups and grouped by number o members"""
-        total_perim_fixed = 0 
+        total_perim_fixed = 0
         total_perim_adaptive = 0
-        
+
         # Maximum number of members in a group
         max_members = max(self.group_info['group_nb'])
         gperim_adap = [0] * max_members
         gperim_fixed = [0] * max_members
-        total_perim_fixed =  sum(self.group_info['fixed_perim'])
+        total_perim_fixed = sum(self.group_info['fixed_perim'])
         total_perim_adaptive = sum(self.group_info['adaptive_perim'])
-        
-        
-        for group_nb in self.group_info['group_nb']:
-            gperim_adap[group_nb - 1] += self.group_info['adaptive_perim'][group_nb - 1 ]
-            gperim_fixed[group_nb - 1] += self.group_info['fixed_perim'][group_nb - 1]
-            
 
-            
+        for group_nb in self.group_info['group_nb']:
+            gperim_adap[group_nb -
+                        1] += self.group_info['adaptive_perim'][group_nb - 1]
+            gperim_fixed[group_nb -
+                         1] += self.group_info['fixed_perim'][group_nb - 1]
+
         return gperim_adap, gperim_fixed, total_perim_fixed, total_perim_adaptive
-        
 
     def solve(self):
         """ """
         adaptive_perimeter = self.group_info['adaptive_perim']
         fixed_perimeter = self.group_info['fixed_perim']
-        
-        
+
         gperim_adap, gperim_fixed, total_perim_fixed, total_perim_adaptive = self.sum_perimeter()
 
-        
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
         plt.style.use('seaborn-deep')
@@ -94,7 +91,7 @@ class Bar:
         labels = []
         nb_labels = range(max(self.group_info['group_nb']))
         for i in nb_labels:
-            labels.append( str((i + 1))  )
+            labels.append(str((i + 1)))
 
         x = np.arange(len(labels))  # the label locations
         width = 0.35  # the width of the bars

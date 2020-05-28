@@ -260,7 +260,7 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, N=200, show_grou
     ax2.plot(x_approach, y_approach, 'c.', markersize=5)
 
     center_x, center_y, orientation = zones_center(
-        approaching_zones, group_pos, group_radius,limit_points)
+        approaching_zones, group_pos, group_radius, limit_points)
     ax2.plot(center_x, center_y, 'r.', markersize=5)
 
     for i, angle in enumerate(orientation):
@@ -288,8 +288,8 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, N=200, show_grou
     # plt.clf()
     # plt.close()
     approaching_poses = []
-    for idx, x in enumerate(center_x):
-        print(idx)
-        approaching_poses.append((center_x[idx], center_y[idx], orientation[idx]))
-    print(approaching_poses)
+    for idx, value in enumerate(center_x):
+        approaching_poses.append(
+            (center_x[idx], center_y[idx], orientation[idx]))
+
     return approaching_poses

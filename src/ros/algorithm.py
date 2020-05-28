@@ -142,6 +142,7 @@ def create_shapely_ellipse(center, lengths, angle=0):
     ellr = affinity.rotate(ell, angle)
     return ellr
 
+
 def minimum_personalspace(sx, sy):
     """Checks if the parameters are at least the human body dimensions."""
     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual
@@ -317,9 +318,9 @@ def plot_group(group_pose, group_radius, pspace_radius, ospace_radius, ax, perso
     approaching_x = [j[0] for j in approaching_filter]
     approaching_y = [k[1] for k in approaching_filter]
     ax.plot(approaching_x, approaching_y, 'c.', markersize=5)
-    
-    
-def estimate_ellipse_parameters(group_radius, pspace_radius,ospace_radius,group_pose,persons,group_nb):
+
+
+def estimate_ellipse_parameters(group_radius, pspace_radius, ospace_radius, group_pose, persons, group_nb):
     """ Estimates ellipse parameters representation of personal space"""
     # Groups of 2 elements:
     if group_nb == 2:
@@ -350,7 +351,7 @@ def estimate_ellipse_parameters(group_radius, pspace_radius,ospace_radius,group_
         sx = PSPACEX
         sy = PSPACEY
 
-        # Checks for intersections between all members of the group 
+        # Checks for intersections between all members of the group
         for i in range(len(persons) - 1):
             w = i
             for j in range(w + 1, len(persons)):
@@ -365,7 +366,7 @@ def estimate_ellipse_parameters(group_radius, pspace_radius,ospace_radius,group_
     else:
         # Check if the parameters are less then human dimensions
         (sx, sy) = minimum_personalspace(sx, sy)
-    return sx,sy
+    return sx, sy
 
 
 class SpaceModeling:
@@ -432,15 +433,13 @@ class SpaceModeling:
             self.group_data['ospace_radius'].append(ospace_radius)
             self.group_data['pspace_radius'].append(pspace_radius)
 
-
     def solve(self):
         """ Estimates the personal space and group space."""
-
 
         # Iterate over groups
         for k in range(len(self.group_data['group_nb'])):
             print("Modeling Group " + str(k + 1) + " ...")
-       
+
             group_radius = self.group_data['group_radius'][k]
             pspace_radius = self.group_data['pspace_radius'][k]
             ospace_radius = self.group_data['ospace_radius'][k]
@@ -448,14 +447,15 @@ class SpaceModeling:
             persons = self.persons[k]
             group_nb = self.group_data['group_nb'][k]
 
-            sx, sy = estimate_ellipse_parameters(group_radius, pspace_radius,ospace_radius,group_pose,persons,group_nb)
+            sx, sy = estimate_ellipse_parameters(
+                group_radius, pspace_radius, ospace_radius, group_pose, persons, group_nb)
             # Stores the parameters of the personal of the individuals of the group
             self.pspace_param[k] = (sx, sy)
-      
-            
-            approaching_poses = estimate_gaussians(persons, self.group_data, k, self.pspace_param[k])
 
-   
+            approaching_poses = estimate_gaussians(
+                persons, self.group_data, k, self.pspace_param[k])
+
+
 def main():
     if len(sys.argv) > 1:
         file = "data/" + sys.argv[1]
@@ -463,7 +463,7 @@ def main():
         with open(file) as fh:
             app = SpaceModeling(fh)
             app.solve()
-            fh.close()    
+            fh.close()
     else:
         print("Usage: %s <filename>" % (sys.argv[0]))
 

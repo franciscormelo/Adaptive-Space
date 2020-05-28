@@ -142,6 +142,7 @@ def create_shapely_ellipse(center, lengths, angle=0):
     ellr = affinity.rotate(ell, angle)
     return ellr
 
+
 def minimum_personalspace(sx, sy):
     """Checks if the parameters are at least the human body dimensions."""
     if sy < HUMAN_Y / 2:  # the personal space should be at least the size of the individual

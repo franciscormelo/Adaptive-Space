@@ -241,7 +241,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     cs1 = axs[0].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
-    F_approaching_filter, F_approaching_zones,F_limit_points = approaching_area_filtering(
+    F_approaching_filter, F_approaching_zones, F_limit_points = approaching_area_filtering(
         F_approaching_area, cs1.allsegs[LEVEL][0])
     F_x_approach = [j[0] for j in F_approaching_filter]
     F_y_approach = [k[1] for k in F_approaching_filter]
@@ -251,10 +251,9 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     axs[0].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
 
     F_center_x, F_center_y, F_orientation = zones_center(
-        F_approaching_zones, group_pos, group_radius,F_limit_points)
+        F_approaching_zones, group_pos, group_radius, F_limit_points)
     axs[0].plot(F_center_x, F_center_y, 'r.', markersize=5)
-    
-    
+
     for i, angle in enumerate(F_orientation):
         draw_arrow(F_center_x[i], F_center_y[i], angle, axs[0])
 
@@ -313,7 +312,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     cs1 = axs[1].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
-    H_approaching_filter, H_approaching_zones,H_limit_points = approaching_area_filtering(
+    H_approaching_filter, H_approaching_zones, H_limit_points = approaching_area_filtering(
         H_approaching_area, cs1.allsegs[LEVEL][0])
 
     H_approaching_filter, H_approaching_zones = approaching_heuristic(
@@ -343,7 +342,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     axs[1].set_aspect(aspect=1)
     fig.tight_layout()
-    
+
     if plot:
         plt.show(block=False)
         print("==================================================")
