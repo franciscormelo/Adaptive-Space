@@ -17,7 +17,7 @@ from ellipse import plot_ellipse
 
 from scipy.stats import multivariate_normal
 
-from approaching_pose import zones_center, approaching_area_filtering
+from approaching_pose import approaching_area_filtering, approaching_heuristic, zones_center
 
 
 # CONSTANTS
@@ -254,6 +254,8 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     # Approaching Area filtering - remove points that are inside the personal space of a person
     approaching_filter, approaching_zones, limit_points = approaching_area_filtering(
         approaching_area, cs.allsegs[LEVEL][0])
+    approaching_filter, approaching_zones = approaching_heuristic(
+        group_radius, pspace_radius, group_pos, approaching_filter, cs.allsegs[LEVEL][0], approaching_zones)
 
     x_approach = [j[0] for j in approaching_filter]
     y_approach = [k[1] for k in approaching_filter]

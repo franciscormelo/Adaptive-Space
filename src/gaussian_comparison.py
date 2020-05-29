@@ -34,6 +34,9 @@ F_PSPACEY = 45
 # F_PSPACEX = 80.0
 # F_PSPACEY = 60.0
 
+# F_PSPACEX = 120
+# F_PSPACEY = 110
+
 
 def plot_person(x, y, angle, ax, plot_kwargs):
     """ Plots a person from a top view."""
@@ -243,6 +246,8 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     F_approaching_filter, F_approaching_zones, F_limit_points = approaching_area_filtering(
         F_approaching_area, cs1.allsegs[LEVEL][0])
+    F_approaching_filter, F_approaching_zones = approaching_heuristic(
+        group_radius, pspace_radius, group_pos, F_approaching_filter, cs1.allsegs[LEVEL][0], F_approaching_zones)
     F_x_approach = [j[0] for j in F_approaching_filter]
     F_y_approach = [k[1] for k in F_approaching_filter]
 

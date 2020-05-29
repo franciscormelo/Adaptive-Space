@@ -39,11 +39,8 @@ PFACTOR = PSPACEX / PSPACEY
 
 INCREMENT = 1
 
-# DSZ PARAMETERS in cm
-F_PSPACEX = 54
-F_PSPACEY = 45
-# F_PSPACEX = 80
-# F_PSPACEY = 60
+
+
 
 
 def euclidean_distance(x1, y1, x2, y2):
@@ -483,7 +480,7 @@ class SpaceModeling:
 
             for idx, person in enumerate(persons, start=1):
                 draw_personalspace(
-                    person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY, plot_kwargs, idx)  # plot using ellipse.py functions
+                    person[0], person[1], person[2], ax, PSPACEX, PSPACEY, plot_kwargs, idx)  # plot using ellipse.py functions
 
         plt.rc('text', usetex=True)
         plt.rc('font', family='serif')
@@ -543,7 +540,7 @@ def main():
                                    'linestyle': '-', 'linewidth': 0.8}
                     for k, person in enumerate(app.persons[idx], start=1):
                         draw_personalspace(
-                            person[0], person[1], person[2], ax, F_PSPACEX, F_PSPACEY, plot_kwargs, k)  # plot using ellipse.py functions
+                            person[0], person[1], person[2], ax, PSPACEX, PSPACEY, plot_kwargs, k)  # plot using ellipse.py functions
 
                     plt.rc('text', usetex=True)
                     plt.rc('font', family='serif')
@@ -592,18 +589,20 @@ def main():
 
                     aperim, fperim = plot_gaussians(
                         app.persons[idx], app.group_data, idx, app.pspace_param[idx])
-                    # aperim = []
-                    # fperim= []
+                    ##########################
+                    aperim = []
+                    fperim= []
 
-                    # for idx,group_persons in enumerate(app.persons):
-                    #     ap,fp = plot_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx], plot = False)
-                    #     aperim.append(ap)
-                    #     fperim.append(fp)
+                    for idx,group_persons in enumerate(app.persons):
+                        ap,fp = plot_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx], plot = False)
+                        aperim.append(ap)
+                        fperim.append(fp)
 
-                    # Writes the parameters of the personal space for each group
-                    # pfile = open("data/groups_perimeter.txt", "w+")
-                    # app.write_perimeter(pfile,fperim,aperim)
-                    # pfile.close()
+                    #Writes the parameters of the personal space for each group
+                    pfile = open("data/groups_perimeter.txt", "w+")
+                    app.write_perimeter(pfile,fperim,aperim)
+                    pfile.close()
+                    ###############################
                 else:
                     print("Invalid group number.")
                     print()
