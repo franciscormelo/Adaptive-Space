@@ -54,6 +54,12 @@ class Bar:
                         xytext=(0, 3),  # 3 points vertical offset
                         textcoords="offset points",
                         ha='center', va='bottom')
+    # def average_perimeter(self):
+    #     """ """
+    #     average_perim = [] * max(self.group_info['group_nb'])
+    #     for group_nb in self.group_info['group_nb']:
+    #         average_perim[group_nb -1 ].append()
+            
 
     def sum_perimeter(self):
         """ Return the sum of perimeter of all groups and grouped by number o members"""
@@ -67,11 +73,12 @@ class Bar:
         total_perim_fixed = sum(self.group_info['fixed_perim'])
         total_perim_adaptive = sum(self.group_info['adaptive_perim'])
 
-        for group_nb in self.group_info['group_nb']:
+        for idx,group_nb in enumerate(self.group_info['group_nb']):
+            print(idx)
             gperim_adap[group_nb -
-                        1] += self.group_info['adaptive_perim'][group_nb - 1]
+                        1] += self.group_info['adaptive_perim'][idx]
             gperim_fixed[group_nb -
-                         1] += self.group_info['fixed_perim'][group_nb - 1]
+                         1] += self.group_info['fixed_perim'][idx]
 
         return gperim_adap, gperim_fixed, total_perim_fixed, total_perim_adaptive
 
