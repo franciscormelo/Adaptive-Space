@@ -18,7 +18,7 @@ class Bar:
 
     def __init__(self):
         """ """
-    pass
+    
 
     def autolabel(self, rects, ax):
         """Attach a text label above each bar in *rects*, displaying its height."""
