@@ -252,7 +252,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     fig.colorbar(cs)
 
     # Approaching Area filtering - remove points that are inside the personal space of a person
-    approaching_filter, approaching_zones, limit_points = approaching_area_filtering(
+    approaching_filter, approaching_zones = approaching_area_filtering(
         approaching_area, cs.allsegs[LEVEL][0])
     approaching_filter, approaching_zones = approaching_heuristic(
         group_radius, pspace_radius, group_pos, approaching_filter, cs.allsegs[LEVEL][0], approaching_zones)
@@ -262,7 +262,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     ax2.plot(x_approach, y_approach, 'c.', markersize=5)
 
     center_x, center_y, orientation = zones_center(
-        approaching_zones, group_pos, group_radius, limit_points)
+        approaching_zones, group_pos, group_radius)
     ax2.plot(center_x, center_y, 'r.', markersize=5)
 
     for i, angle in enumerate(orientation):

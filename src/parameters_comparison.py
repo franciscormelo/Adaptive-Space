@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 '''
-    File name: space_modeling.py
+    File name: parameters_comparison.py
     Author: Francisco Melo
     Mail: francisco.raposo.melo@tecnico.ulisboa.pt
     Date created: X/XX/XXXX
@@ -29,7 +29,7 @@ HUMAN_X = 20
 # Personal Space Maximum 45 - 120 cm
 # PSPACEX = 80.0
 # PSPACEY = 60.0
-PSPACEX = 54  # DSZ parameters
+PSPACEX = 55  # DSZ parameters
 PSPACEY = 45
 
 STRIDE = 65
@@ -590,18 +590,19 @@ def main():
                     aperim, fperim = plot_gaussians(
                         app.persons[idx], app.group_data, idx, app.pspace_param[idx])
                     ##########################
-                    aperim = []
-                    fperim= []
+                    # aperim = []
+                    # fperim= []
 
-                    for idx,group_persons in enumerate(app.persons):
-                        ap,fp = plot_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx], plot = False)
-                        aperim.append(ap)
-                        fperim.append(fp)
+                    # for idx,group_persons in enumerate(app.persons):
+                    #     print("Writting Group " + str(idx+1))
+                    #     ap,fp = plot_gaussians(group_persons, app.group_data, idx, app.pspace_param[idx], plot = False)
+                    #     aperim.append(ap)
+                    #     fperim.append(fp)
 
-                    #Writes the parameters of the personal space for each group
-                    pfile = open("data/groups_perimeter.txt", "w+")
-                    app.write_perimeter(pfile,fperim,aperim)
-                    pfile.close()
+                    # #Writes the parameters of the personal space for each group
+                    # pfile = open("data/groups_perimeter.txt", "w+")
+                    # app.write_perimeter(pfile,fperim,aperim)
+                    # pfile.close()
                     ###############################
                 else:
                     print("Invalid group number.")

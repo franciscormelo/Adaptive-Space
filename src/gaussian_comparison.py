@@ -29,7 +29,7 @@ BACK_FACTOR = 1.3
 LEVEL = 1
 
 # DSZ PARAMETERS in cm
-F_PSPACEX = 54
+F_PSPACEX = 55
 F_PSPACEY = 45
 # F_PSPACEX = 80.0
 # F_PSPACEY = 60.0
@@ -244,7 +244,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     cs1 = axs[0].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
-    F_approaching_filter, F_approaching_zones, F_limit_points = approaching_area_filtering(
+    F_approaching_filter, F_approaching_zones = approaching_area_filtering(
         F_approaching_area, cs1.allsegs[LEVEL][0])
     F_approaching_filter, F_approaching_zones = approaching_heuristic(
         group_radius, pspace_radius, group_pos, F_approaching_filter, cs1.allsegs[LEVEL][0], F_approaching_zones)
@@ -256,7 +256,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     axs[0].plot(F_x_approach, F_y_approach, 'c.', markersize=5)
 
     F_center_x, F_center_y, F_orientation = zones_center(
-        F_approaching_zones, group_pos, group_radius, F_limit_points)
+        F_approaching_zones, group_pos, group_radius)
     axs[0].plot(F_center_x, F_center_y, 'r.', markersize=5)
 
     for i, angle in enumerate(F_orientation):
@@ -317,7 +317,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     cs1 = axs[1].contour(X, Y, Z_F, cmap="jet", linewidths=0.8, levels=10)
 
-    H_approaching_filter, H_approaching_zones, H_limit_points = approaching_area_filtering(
+    H_approaching_filter, H_approaching_zones = approaching_area_filtering(
         H_approaching_area, cs1.allsegs[LEVEL][0])
 
     H_approaching_filter, H_approaching_zones = approaching_heuristic(
@@ -332,7 +332,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
     axs[1].plot(H_x_approach, H_y_approach, 'c.', markersize=5)
 
     H_center_x, H_center_y, H_orientation = zones_center(
-        H_approaching_zones, group_pos, group_radius, H_limit_points)
+        H_approaching_zones, group_pos, group_radius)
     axs[1].plot(H_center_x, H_center_y, 'r.', markersize=5)
 
     for i, angle in enumerate(H_orientation):

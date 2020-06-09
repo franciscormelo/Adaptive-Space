@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 '''
-    File name: bar_perimeter.py
+    File name: bar_perimeter_diff_iconditions.py
     Author: Francisco Melo
     Mail: francisco.raposo.melo@tecnico.ulisboa.pt
     Date created: X/XX/XXXX
@@ -42,9 +42,9 @@ class Bar:
 
         labels = []
             
-        labels = ["55 - 45","65 - 55","75 - 65","120 - 110"]
-        adaptive_perim = [56284,55445 ,54873 ,55555]
-        fixed_perim = [27110,17112 ,10903 ,3250]
+        labels = ["55 - 45","65 - 55","75 - 65","85 - 75","95 - 85","100 - 90","110 - 100","120 - 110"]
+        adaptive_perim = [56743,55446,54873,54177,55224,54980,54495,54588]
+        fixed_perim = [26989,17112,10903,6596,3765,2606,1055,297]
 
         x = np.arange(len(labels))  # the label locations
         width = 0.35  # the width of the bars
@@ -61,12 +61,13 @@ class Bar:
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
         ax.legend()
+        ax.grid(axis='y', alpha=0.75)
 
         self.autolabel(rects1, ax)
         self.autolabel(rects2, ax)
 
 
-        plt.grid(True)
+        
         # #plt.savefig('figures/histograms_2.eps', format='eps')
         plt.show(block=False)
         print("==================================================")

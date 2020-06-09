@@ -14,6 +14,8 @@ from shapely.geometry import Point
 from shapely.geometry.polygon import Polygon
 from ellipse import plot_ellipse
 
+import numpy as np
+
 # Radius increment in cm
 R_STEP = 1
 
@@ -48,33 +50,46 @@ def approaching_area_filtering(approaching_area, contour_points):
 
     polygon = Polygon(contour_points)
 
-    # approaching_filter = [(x, y) for x, y in zip(
-    #     approaching_area[0], approaching_area[1]) if not polygon.contains(Point([x, y]))]
     approaching_filter = []
     approaching_zones = []
     aux_list = []
-    limit_points = []
-
+    
+    cnt = 0
     for x, y in zip(approaching_area[0], approaching_area[1]):
         if not polygon.contains(Point([x, y])):
-            if not aux_list:
-                limit_points.append((x, y, "s"))
+            cnt+=1
+        else:
+            break
+    
+    if cnt !=0:
+        px = approaching_area[0][0:cnt]
+        py = approaching_area[1][0:cnt]
+        
+        x_area = []
+        y_area = []
 
+        c1 = approaching_area[0][cnt:]
+        c2 = approaching_area[1][cnt:]
+        
+        x_area = np.concatenate([c1, px])
+        y_area = np.concatenate([c2, py])
+    else:
+        x_area = approaching_area[0]
+        y_area = approaching_area[1]
+
+    for x, y in zip(x_area, y_area):
+        if not polygon.contains(Point([x, y])):
             approaching_filter.append((x, y))
             aux_list.append((x, y))
+ 
+        elif aux_list:
+            approaching_zones.append(aux_list)
+            aux_list = []
+        
+    if aux_list:
+        approaching_zones.append(aux_list)
 
-            prev = (x, y, "e")
-
-        else:
-
-            if not aux_list:
-                pass
-            else:
-                approaching_zones.append(aux_list)
-                aux_list = []
-                limit_points.append(prev)
-
-    return approaching_filter, approaching_zones, limit_points[1:]
+    return approaching_filter, approaching_zones
 
 
 def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_filter, contour_points, approaching_zones):
@@ -91,7 +106,7 @@ def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_fi
 
             approaching_area = plot_ellipse(
                 semimaj=approaching_radius, semimin=approaching_radius, x_cent=group_pos[0], y_cent=group_pos[1], data_out=True)
-            approaching_filter, approaching_zones, limit_points = approaching_area_filtering(
+            approaching_filter, approaching_zones = approaching_area_filtering(
                 approaching_area, contour_points)
 
             approaching_radius += R_STEP
@@ -99,13 +114,17 @@ def approaching_heuristic(group_radius, pspace_radius, group_pos, approaching_fi
     return approaching_filter, approaching_zones
 
 
-def zones_center(approaching_zones, group_pos, group_radius, limit_points):
+def zones_center(approaching_zones, group_pos, group_radius):
     """ """
     # https://stackoverflow.com/questions/26951544/algorithm-find-the-midpoint-of-an-arc
     center_x = []
     center_y = []
     orientation = []
+    
     for zone in approaching_zones:
+        # Sort points clockwise
+        zone.sort(key=lambda c:math.atan2(c[0], c[1]))
+        
         idx = int(len(zone) / 2)
         center_x.append(zone[idx][0])
         center_y.append(zone[idx][1])

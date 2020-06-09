@@ -14,6 +14,8 @@ import numpy as np
 import statistics
 from statistics import mean, stdev
 
+# plt.rcParams["font.family"] = "Arial"
+# plt.rcParams.update({'font.size': 10})
 
 class Bar:
     """Creates bar chart for perimeter"""
@@ -187,12 +189,12 @@ class Bar:
    
         fig2, ax2 = plt.subplots(1, 2, tight_layout=True,sharey = True)
         ax2[0].set_ylabel(r'Perimeter $(cm)$')
-        ax2[0].set_xlabel(r'Number of Members')
+        ax2[0].set_xlabel(r'Number of Group Members')
         ax2[0].set_title(r'Approaching Perimeter Comparison Box Plot - Fixed Parameters')
         ax2[0].boxplot(perim_fixed_groups)
         
         ax2[1].set_ylabel(r'Perimeter $(cm)$')
-        ax2[1].set_xlabel(r'Number of Members')
+        ax2[1].set_xlabel(r'Number of Group Members')
         ax2[1].set_title(r'Approaching Perimeter Comparison Box Plot - Adaptive Parameters')
         ax2[1].boxplot(perim_adapt_groups)
 #####################################
@@ -201,7 +203,7 @@ class Bar:
 
         fig3, ax3 = plt.subplots(1, 2, tight_layout=True,sharey = True)
         ax3[0].set_ylabel(r'Perimeter Mean $(cm)$')
-        ax3[0].set_xlabel(r'Number of Members')
+        ax3[0].set_xlabel(r'Number of Group Members')
         ax3[0].set_title(r'Approaching Perimeter Comparison - Mean and Standar Deviation  - Fixed Parameters')
         ax3[0].bar(x, average_fixed, yerr=std_fixed, align='center', alpha=0.5, ecolor='black', capsize=10)
         ax3[0].set_xticks(x)
@@ -209,9 +211,10 @@ class Bar:
         ax3[0].yaxis.grid(True)
         
         ax3[1].set_ylabel(r'Perimeter Mean $(cm)$')
-        ax3[1].set_xlabel(r'Number of Members')
+        ax3[1].set_xlabel(r'Number of Group Members')
         ax3[1].set_title(r'Approaching Perimeter Comparison - Mean and Standar Deviation - Adaptive Parameters')
-        ax3[1].errorbar(x, average_adapt, yerr=std_adapt,marker="o", linestyle="")
+        #ax3[1].errorbar(x, average_adapt, yerr=std_adapt,marker="o", linestyle="")
+        ax3[1].bar(x, average_adapt, yerr=std_adapt, align='center', alpha=0.5, ecolor='black', capsize=10)
         ax3[1].set_xticks(x)
         ax3[1].set_xticklabels(labels)
         ax3[1].yaxis.grid(True)
