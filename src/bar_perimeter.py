@@ -150,9 +150,9 @@ class Bar:
                            width, label='Fixed Parameters')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
-        ax[0].set_ylabel(r'Perimeter $(cm)$')
+        ax[0].set_ylabel(r'Perimeter Sum $(cm)$')
         ax[0].set_xlabel(r'Number of members')
-        ax[0].set_title(r'Approaching Perimeter Comparison')
+        ax[0].set_title(r'Approaching Perimeter Sum Comparison')
         ax[0].set_xticks(x)
         ax[0].set_xticklabels(labels)
         ax[0].legend()

@@ -25,8 +25,6 @@ from approaching_pose import approaching_area_filtering, approaching_heuristic, 
 HUMAN_Y = 45
 HUMAN_X = 20
 
-# Relation between personal frontal space and back space
-BACK_FACTOR = 1.3
 
 # APPROACHING LEVEL
 LEVEL = 1
@@ -153,7 +151,7 @@ def plot_robot(pose, ax):
     ax.plot(x, y, 'o', color='black', markersize=5)
 
 
-def estimate_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_space=True):
+def estimate_gaussians(persons, group_data, idx, ellipse_param, back_param, N=200, show_group_space=True, diff_params = False):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters. Retrurns possible approaching poses"""
 
     group_radius = group_data['group_radius'][idx]
@@ -195,14 +193,24 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, N=200, show_grou
     plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
     # Personal Space as gaussian for each person in the group
 
-    for person in persons:
+    for idx, person in enumerate(persons):
+        
+        if diff_params:
+            sx = ellipse_param[idx][0]
+            sy = ellipse_param[idx][1]
+            sx_back = back_param[idx]
+        else:
+            sx = ellipse_param[0]
+            sy = ellipse_param[1]
+            sx_back = back_param
+        
         Z1 = None
         mu = np.array([person[0], person[1]])
         Sigma = params_conversion(
-            ellipse_param[0], ellipse_param[1], person[2])
+            sx, sy, person[2])
 
         Sigma_back = params_conversion(
-            ellipse_param[0] / BACK_FACTOR, ellipse_param[1], person[2])
+            sx_back, sy, person[2])
 
         # The distribution on the variables X, Y packed into pos.
         Z1 = asymmetric_gaussian(
@@ -294,5 +302,5 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, N=200, show_grou
         approaching_poses.append(
             (center_x[l], center_y[l], orientation[l]))
 
-    map_limits = [xmin,xmax,ymin,ymax]
+    map_limits = [xmin, xmax, ymin, ymax]
     return approaching_poses, Z, map_limits

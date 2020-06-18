@@ -53,24 +53,24 @@ def approaching_area_filtering(approaching_area, contour_points):
     approaching_filter = []
     approaching_zones = []
     aux_list = []
-    
+
     cnt = 0
     for x, y in zip(approaching_area[0], approaching_area[1]):
         if not polygon.contains(Point([x, y])):
-            cnt+=1
+            cnt += 1
         else:
             break
-    
-    if cnt !=0:
+
+    if cnt != 0:
         px = approaching_area[0][0:cnt]
         py = approaching_area[1][0:cnt]
-        
+
         x_area = []
         y_area = []
 
         c1 = approaching_area[0][cnt:]
         c2 = approaching_area[1][cnt:]
-        
+
         x_area = np.concatenate([c1, px])
         y_area = np.concatenate([c2, py])
     else:
@@ -81,11 +81,11 @@ def approaching_area_filtering(approaching_area, contour_points):
         if not polygon.contains(Point([x, y])):
             approaching_filter.append((x, y))
             aux_list.append((x, y))
- 
+
         elif aux_list:
             approaching_zones.append(aux_list)
             aux_list = []
-        
+
     if aux_list:
         approaching_zones.append(aux_list)
 
@@ -120,11 +120,11 @@ def zones_center(approaching_zones, group_pos, group_radius):
     center_x = []
     center_y = []
     orientation = []
-    
+
     for zone in approaching_zones:
         # Sort points clockwise
-        zone.sort(key=lambda c:math.atan2(c[0], c[1]))
-        
+        zone.sort(key=lambda c: math.atan2(c[0], c[1]))
+
         idx = int(len(zone) / 2)
         center_x.append(zone[idx][0])
         center_y.append(zone[idx][1])

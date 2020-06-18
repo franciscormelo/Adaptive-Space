@@ -38,6 +38,10 @@ PFACTOR = PSPACEX / PSPACEY
 INCREMENT = 1
 
 
+# Relation between personal frontal space and back space
+BACK_FACTOR = 1.3
+
+
 def euclidean_distance(x1, y1, x2, y2):
     """Euclidean distance between two points in 2D."""
     dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
@@ -453,8 +457,8 @@ class SpaceModeling:
             self.pspace_param[k] = (sx, sy)
 
             approaching_poses, persons_costmap, map_limits = estimate_gaussians(
-                persons, self.group_data, k, self.pspace_param[k])
-            
+                persons, self.group_data, k, self.pspace_param[k], self.pspace_param[k][0]/BACK_FACTOR)
+
         return approaching_poses, persons_costmap, map_limits
 
 
