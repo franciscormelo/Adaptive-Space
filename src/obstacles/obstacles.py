@@ -15,13 +15,13 @@ import sys
 from algorithm import SpaceModeling
 
 from gaussian_modeling import estimate_gaussians, plot_person, plot_group
-
+from bresenham import bresenham
 
 # Relation between personal frontal space and back space
 BACK_FACTOR = 1.3
 
 # Robot diameter in cm
-R_DIM = 60
+ROBOT_DIM = 60
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -71,6 +71,7 @@ def plotLineLow(x0, y0, x1, y1, costmap):
     y = y0
 
     for x in range(x0, x1 + 1, xi):
+
         if costmap[y][x] == 2:
             print("Intersection")
             return x, y, costmap
@@ -102,6 +103,7 @@ def plotLineHigh(x0, y0, x1, y1, costmap):
     x = x0
 
     for y in range(y0, y1 + 1, yi):
+
         if costmap[y][x] == 2:
             return x, y, costmap
         costmap[y][x] = 3
@@ -111,6 +113,20 @@ def plotLineHigh(x0, y0, x1, y1, costmap):
             D = D - 2 * dy
 
         D = D + 2 * dx
+    return None
+
+
+def find_collision(x0, y0, x1, y1, costmap):
+
+    bresenham_points = list(bresenham(x0, y0, x1, y1))
+
+    for point in bresenham_points:
+        if costmap[point[1]][point[0]] == 2:
+            print("Intersection")
+            return point[0], point[1], costmap
+
+        costmap[point[1]][point[0]] = 3
+
     return None
 
 
@@ -133,12 +149,12 @@ class Obstacles(SpaceModeling):
 
         # Gets the coordinates of a windows around the group
         xmin = 0
-        xmax = map_limits[1] + abs(map_limits[0])
+        xmax = map_limits[1] - map_limits[0]
         ymin = 0
-        ymax = map_limits[3] + abs(map_limits[2])
+        ymax = map_limits[3] - map_limits[2]
 
-        x_shift = abs(map_limits[0])
-        y_shift = abs(map_limits[2])
+        x_shift = - map_limits[0]
+        y_shift = - map_limits[2]
 
         X = np.linspace(xmin, xmax, N)
         Y = np.linspace(ymin, ymax, N)
@@ -178,9 +194,11 @@ class Obstacles(SpaceModeling):
         fig.canvas.mpl_connect('button_press_event', onclick)
 
         plt.show()
+
         fig2, ax2 = plt.subplots(1, 1, tight_layout=True)
         cs = ax2.contour(X, Y, costmap, cmap="jet", linewidths=0.8, levels=10)
         fig2.colorbar(cs)
+
         plt.show()
 
         l_sxy, lsx_back = self.adapt_parameters(
@@ -220,13 +238,13 @@ class Obstacles(SpaceModeling):
 
             for idx, angle in enumerate(angles):
 
-              # d is the search distance to the wall gaussian parameter  + robot diamter + safety margin
+              # d is the search distance to the wall =  gaussian parameter  + robot diameter + safety margin
                 if idx == 0:
-                    d = sx + R_DIM + 20
+                    d = sx + ROBOT_DIM + 20
                 elif idx == 1 or idx == 3:
-                    d = sy + R_DIM + 20
+                    d = sy + ROBOT_DIM + 20
                 elif idx == 2:
-                    d = sx_back + R_DIM + 20
+                    d = sx_back + ROBOT_DIM + 20
 
                 px1 = px + (d * math.cos(angle))  # in cm
                 py1 = py + (d * math.sin(angle))  # in cm
@@ -234,8 +252,8 @@ class Obstacles(SpaceModeling):
                 x1 = int((px1 * N) / xmax)  # in index
                 y1 = int((py1 * N) / ymax)  # in index
 
-                # Bresenham Line algorithm
-                g = plotLine(x0, y0, x1, y1, costmap)
+                g = find_collision(x0, y0, x1, y1, costmap)
+                #g = plotLine(x0, y0, x1, y1, costmap)
 
                 if g is not None:
                     dx = (g[0] * xmax) / N  # in cm
@@ -246,33 +264,32 @@ class Obstacles(SpaceModeling):
                     dis = euclidean_distance(px, py, dx, dy)  # dis in cm
 
                     if idx == 0:
-                        if dis - sx < R_DIM:  # Check if robot is able to naviagte
-                            if dis <= sx:
+                        if dis - sx < ROBOT_DIM:  # Check if robot is able to naviagte
+                            if dis <= sx:  # Personal space is overlaping obstacle
                                 sx = dis
-                            elif dis - R_DIM >= HUMAN_X / 2:
-                                sx = dis - R_DIM
+                            elif dis - ROBOT_DIM >= HUMAN_X / 2:
+                                sx = dis - ROBOT_DIM
                                 print("NEW sx " + str(sx))
                             else:
                                 print("Impossible to adapt parameter sx")
 
-
                     elif idx == 1 or idx == 3:
-                        if dis - sy < R_DIM:  # Check if robot is able to naviagte
-                            if dis <= sy:
+                        if dis - sy < ROBOT_DIM:  # Check if robot is able to naviagte
+                            if dis <= sy:  # Personal space is overlaping obstacle
                                 sy = dis
-                            elif dis - R_DIM >= HUMAN_Y / 2:
-                                sy = dis - R_DIM
+                            elif dis - ROBOT_DIM >= HUMAN_Y / 2:
+                                sy = dis - ROBOT_DIM
                                 print("NEW sy " + str(sy))
-                                      
+
                             else:
                                 print("Impossible to adapt parameter sy")
                     elif idx == 2:
 
-                        if dis - sx_back < R_DIM:  # Check if robot is able to naviagte
-                            if dis <= sx_back: 
+                        if dis - sx_back < ROBOT_DIM:  # Check if robot is able to naviagte
+                            if dis <= sx_back:  # Personal space is overlaping obstacle
                                 sx_back = dis
-                            elif dis - R_DIM >= HUMAN_X / 2:
-                                sx_back = dis - R_DIM
+                            elif dis - ROBOT_DIM >= HUMAN_X / 2:
+                                sx_back = dis - ROBOT_DIM
                                 print("NEW sx_back " + str(sx_back))
                             else:
                                 print("Impossible to adapt parameter sx_back")
@@ -301,26 +318,29 @@ def main():
 
             X, Y = np.meshgrid(X, Y)
             fig, ax = plt.subplots(1, 1, tight_layout=True)
+
             cs = ax.contour(X, Y, costmap, cmap="jet",
                             linewidths=0.8, levels=10)
             fig.colorbar(cs)
             plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
             for person in app.persons[0]:
                 plot_person(person[0], person[1], person[2], ax, plot_kwargs)
-                
+
             idx = 0
             group_radius = app.group_data['group_radius'][idx]
             pspace_radius = app.group_data['pspace_radius'][idx]
             ospace_radius = app.group_data['ospace_radius'][idx]
             group_pos = app.group_data['group_pose'][idx]
-            plot_group(group_pos, group_radius, pspace_radius, ospace_radius, ax)
+            plot_group(group_pos, group_radius,
+                       pspace_radius, ospace_radius, ax)
+            ax.set_aspect(aspect=1)
             plt.show()
 
             fig2, ax2 = plt.subplots(1, 1, tight_layout=True)
             im = plt.imshow(costmap, cmap="jet",
                             extent=map_limits, origin="lower")
             plt.colorbar()
-
+            ax2.set_aspect(aspect=1)
             plt.show()
 
     else:

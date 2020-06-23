@@ -51,7 +51,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "ideap/groups_perimeter_full.txt" 
+                "synth/groups_perimeter.txt" 
             ]
         },
         {
