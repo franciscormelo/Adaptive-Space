@@ -456,8 +456,11 @@ class SpaceModeling:
             # Stores the parameters of the personal of the individuals of the group
             self.pspace_param[k] = (sx, sy)
 
+            group_params = [self.group_data['ospace_radius']
+                            [k], self.group_data['ospace_radius'][k]]
+
             approaching_poses, persons_costmap, map_limits = estimate_gaussians(
-                persons, self.group_data, k, self.pspace_param[k], self.pspace_param[k][0]/BACK_FACTOR)
+                persons, self.group_data, k, self.pspace_param[k], self.pspace_param[k][0]/BACK_FACTOR, group_params)
 
         return approaching_poses, persons_costmap, map_limits
 

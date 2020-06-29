@@ -21,7 +21,7 @@ from gaussian_comparison import plot_gaussians
 
 SHOW_PLOT = True
 
-# CONSTANTS
+# CONSTANTSi
 # Human Body Dimensions top view in cm
 HUMAN_Y = 45
 HUMAN_X = 20

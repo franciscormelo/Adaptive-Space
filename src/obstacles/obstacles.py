@@ -14,6 +14,7 @@ import math
 import sys
 from algorithm import SpaceModeling
 
+
 from gaussian_modeling import estimate_gaussians, plot_person, plot_group
 from bresenham import bresenham
 
@@ -33,87 +34,6 @@ def euclidean_distance(x1, y1, x2, y2):
     """Euclidean distance between two points in 2D."""
     dist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
     return dist
-
-
-def plotLine(x0, y0, x1, y1, costmap):
-    """ """
-
-    if abs(y1 - y0) < abs(x1 - x0):
-        if x0 > x1:
-            g = plotLineLow(x1, y1, x0, y0, costmap)
-        else:
-            g = plotLineLow(x0, y0, x1, y1, costmap)
-    else:
-        if y0 > y1:
-            g = plotLineHigh(x1, y1, x0, y0, costmap)
-
-        else:
-            g = plotLineHigh(x0, y0, x1, y1, costmap)
-
-    return g
-
-
-def plotLineLow(x0, y0, x1, y1, costmap):
-    """ """
-    dx = x1 - x0
-    dy = y1 - y0
-    xi = 1
-    yi = 1
-
-    if dx < 0:
-        xi = -1
-
-    if dy < 0:
-        yi = -1
-        dy = -dy
-
-    D = 2 * dy - dx
-    y = y0
-
-    for x in range(x0, x1 + 1, xi):
-
-        if costmap[y][x] == 2:
-            print("Intersection")
-            return x, y, costmap
-        costmap[y][x] = 3
-
-        if D > 0:
-            y = y + yi
-            D = D - 2 * dx
-
-        D = D + 2 * dy
-    return None
-
-
-def plotLineHigh(x0, y0, x1, y1, costmap):
-    """ """
-    dx = x1 - x0
-    dy = y1 - y0
-    xi = 1
-    yi = 1
-
-    if dx < 0:
-        xi = -1
-        dx = -dx
-
-    if dy < 0:
-        yi = 1
-
-    D = 2 * dx - dy
-    x = x0
-
-    for y in range(y0, y1 + 1, yi):
-
-        if costmap[y][x] == 2:
-            return x, y, costmap
-        costmap[y][x] = 3
-
-        if D > 0:
-            x = x + xi
-            D = D - 2 * dy
-
-        D = D + 2 * dx
-    return None
 
 
 def find_collision(x0, y0, x1, y1, costmap):
@@ -201,27 +121,76 @@ class Obstacles(SpaceModeling):
 
         plt.show()
 
-        l_sxy, lsx_back = self.adapt_parameters(
+        l_sxy, lsx_back, group_params = self.adapt_parameters(
             x_shift, y_shift, costmap, xmax, ymax, N)
 
         persons_costmap = np.zeros([N, N])
 
         approaching_poses, persons_costmap, map_limits = estimate_gaussians(
-            self.persons[0], self.group_data, 0, l_sxy, lsx_back, diff_params=True)
+            self.persons[0], self.group_data, 0, l_sxy, lsx_back, group_params, diff_params=True)
 
         costmap = np.zeros([N, N])
         costmap = persons_costmap
         cond = costmap < obs_costmap
         costmap[cond] = obs_costmap[cond]
 
-        return costmap
+        return costmap, obs_costmap, persons_costmap
 
     def adapt_parameters(self, x_shift, y_shift, costmap, xmax, ymax, N):
         """ """
 
         l_sxy = []
         lsx_back = []
+        group_params = [self.group_data['ospace_radius']
+                        [0], self.group_data['ospace_radius'][0]]
 
+        # Group Space Adaptation
+        idx = 0
+        group_radius = self.group_data['group_radius'][idx]
+        pspace_radius = self.group_data['pspace_radius'][idx]
+        ospace_radius = self.group_data['ospace_radius'][idx]
+        group_pos = self.group_data['group_pose'][idx]
+        group_angles = [0, math.pi/2, math.pi, (3*math.pi)/2]
+        
+        
+        gx = group_pos[0] + x_shift  # in cm
+        gy = group_pos[1] + y_shift  # in cm
+
+        xg0 = int((gx * N) / xmax)  # in index
+        yg0 = int((gy * N) / ymax)  # in index
+        
+        for idx, angle in enumerate(group_angles):
+            d = group_params[0] + ROBOT_DIM + 20
+            
+
+            xg1 = gx + (d * math.cos(angle))  # in cm
+            yg1 = gy + (d * math.sin(angle))  # in cm
+
+            xi = int((xg1 * N) / xmax)  # in index
+            yi = int((yg1 * N) / ymax)  # in index
+
+            g = find_collision(xg0, yg0, xi, yi, costmap)
+
+            if g is not None:
+                dx = (g[0] * xmax) / N  # in cm
+                dy = (g[1] * ymax) / N  # in cm
+                costmap = g[2]
+
+                # dis is the distance from a person to a wall in a specific orientation
+                dis = euclidean_distance(gx, gy, dx, dy)  # dis in cm
+                group_params[0]
+                if idx == 0 or idx ==2:
+                    if dis - group_params[0] < ROBOT_DIM:  # Check if robot is able to naviagte
+                        group_params[0] = dis - ROBOT_DIM
+                        print("NEW group x " + str(group_params[0]))
+
+                elif idx == 1 or idx == 3:
+                    if dis - group_params[1] < ROBOT_DIM:  # Check if robot is able to naviagte
+                        group_params[1] = dis - ROBOT_DIM
+                        print("NEW group y " + str(group_params[1]))
+    
+  
+        # Personal Space Adaptation
         for person in self.persons[0]:
             param = self.pspace_param[0]
             sx = param[0]
@@ -253,7 +222,6 @@ class Obstacles(SpaceModeling):
                 y1 = int((py1 * N) / ymax)  # in index
 
                 g = find_collision(x0, y0, x1, y1, costmap)
-                #g = plotLine(x0, y0, x1, y1, costmap)
 
                 if g is not None:
                     dx = (g[0] * xmax) / N  # in cm
@@ -267,6 +235,8 @@ class Obstacles(SpaceModeling):
                         if dis - sx < ROBOT_DIM:  # Check if robot is able to naviagte
                             if dis <= sx:  # Personal space is overlaping obstacle
                                 sx = dis
+                                if sx < HUMAN_X/2:
+                                    sx = HUMAN_X/2
                             elif dis - ROBOT_DIM >= HUMAN_X / 2:
                                 sx = dis - ROBOT_DIM
                                 print("NEW sx " + str(sx))
@@ -277,6 +247,8 @@ class Obstacles(SpaceModeling):
                         if dis - sy < ROBOT_DIM:  # Check if robot is able to naviagte
                             if dis <= sy:  # Personal space is overlaping obstacle
                                 sy = dis
+                                if sy < HUMAN_Y/2:
+                                    sy = HUMAN_Y/2
                             elif dis - ROBOT_DIM >= HUMAN_Y / 2:
                                 sy = dis - ROBOT_DIM
                                 print("NEW sy " + str(sy))
@@ -288,6 +260,8 @@ class Obstacles(SpaceModeling):
                         if dis - sx_back < ROBOT_DIM:  # Check if robot is able to naviagte
                             if dis <= sx_back:  # Personal space is overlaping obstacle
                                 sx_back = dis
+                                if sx_back < HUMAN_X/2:
+                                    sx_back = HUMAN_X/2
                             elif dis - ROBOT_DIM >= HUMAN_X / 2:
                                 sx_back = dis - ROBOT_DIM
                                 print("NEW sx_back " + str(sx_back))
@@ -297,7 +271,7 @@ class Obstacles(SpaceModeling):
             l_sxy.append([sx, sy])
             lsx_back.append(sx_back)
 
-        return l_sxy, lsx_back
+        return l_sxy, lsx_back, group_params
 
 
 def main():
@@ -309,7 +283,8 @@ def main():
             approaching_poses, persons_costmap, map_limits = app.solve()
 
             N = len(persons_costmap)
-            costmap = app.plt_obstacles(N, persons_costmap, map_limits)
+            costmap, obs_costmap, persons_costmap = app.plt_obstacles(
+                N, persons_costmap, map_limits)
 
             fh.close()
 
@@ -317,32 +292,71 @@ def main():
             Y = np.linspace(map_limits[2], map_limits[3], N)
 
             X, Y = np.meshgrid(X, Y)
-            fig, ax = plt.subplots(1, 1, tight_layout=True)
+            # fig, ax = plt.subplots(1, 1, tight_layout=True)
 
-            cs = ax.contour(X, Y, costmap, cmap="jet",
-                            linewidths=0.8, levels=10)
-            fig.colorbar(cs)
-            plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
-            for person in app.persons[0]:
-                plot_person(person[0], person[1], person[2], ax, plot_kwargs)
+            # cs = ax.contour(X, Y, costmap, cmap="jet",
+            #                 linewidths=0.8, levels=10)
+            # fig.colorbar(cs)
+            # plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
+            # for person in app.persons[0]:
+            #     plot_person(person[0], person[1], person[2], ax, plot_kwargs)
 
+            # idx = 0
+            # group_radius = app.group_data['group_radius'][idx]
+            # pspace_radius = app.group_data['pspace_radius'][idx]
+            # ospace_radius = app.group_data['ospace_radius'][idx]
+            # group_pos = app.group_data['group_pose'][idx]
+            # plot_group(group_pos, group_radius,
+            #            pspace_radius, ospace_radius, ax)
+            # ax.set_aspect(aspect=1)
+            # plt.show()
+
+            # fig2, ax2 = plt.subplots(1, 1, tight_layout=True)
+            # im = plt.imshow(costmap, cmap="jet",
+            #                 extent=map_limits, origin="lower")
+            # plt.colorbar()
+            # ax2.set_aspect(aspect=1)
+            # plt.show()
             idx = 0
             group_radius = app.group_data['group_radius'][idx]
             pspace_radius = app.group_data['pspace_radius'][idx]
             ospace_radius = app.group_data['ospace_radius'][idx]
             group_pos = app.group_data['group_pose'][idx]
-            plot_group(group_pos, group_radius,
-                       pspace_radius, ospace_radius, ax)
-            ax.set_aspect(aspect=1)
-            plt.show()
+            group_params = [app.group_data['ospace_radius']
+                            [0], app.group_data['ospace_radius'][0]]
+            back = 80/1.3
+            approaching_poses_fixed, persons_costmap_fixed, map_limits_fixed = estimate_gaussians(
+                app.persons[0], app.group_data, 0, [80, 60], back, group_params, diff_params=False)
+            
+            plot_kwargs = {'color': 'g', 'linestyle': '-', 'linewidth': 0.8}
+            fig = plt.figure()
+            ax1 = fig.add_subplot(1, 2, 1)
+            cs1 = ax1.contour(X, Y, costmap, cmap="jet",
+                              linewidths=0.8, levels=10)
+            
+            for person in app.persons[0]:
+                plot_person(person[0], person[1], person[2], ax1, plot_kwargs)
+            plot_group(group_pos, group_radius,pspace_radius, ospace_radius, ax1)
 
-            fig2, ax2 = plt.subplots(1, 1, tight_layout=True)
-            im = plt.imshow(costmap, cmap="jet",
-                            extent=map_limits, origin="lower")
-            plt.colorbar()
+            ax2 = fig.add_subplot(1, 2, 2)
+            costmap_fixed = np.zeros([N, N])
+            costmap_fixed = persons_costmap_fixed
+            cond = costmap_fixed < obs_costmap
+            costmap_fixed[cond] = obs_costmap[cond]
+            cs2 = ax2.contour(X, Y, costmap_fixed, cmap="jet",
+                              linewidths=0.8, levels=10)
+            for person in app.persons[0]:
+                plot_person(person[0], person[1], person[2], ax2, plot_kwargs)
+            plot_group(group_pos, group_radius,pspace_radius, ospace_radius, ax2)
+            
+            # a_circle = plt.Circle((550, 0), ROBOT_DIM/2)
+            # b_circle = plt.Circle((550, 0), ROBOT_DIM/2)
+            # ax1.add_artist(a_circle)
+            # ax2.add_artist(b_circle)
+
+            ax1.set_aspect(aspect=1)
             ax2.set_aspect(aspect=1)
             plt.show()
-
     else:
         print("Usage: %s <filename>" % (sys.argv[0]))
 

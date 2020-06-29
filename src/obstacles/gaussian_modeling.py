@@ -151,7 +151,7 @@ def plot_robot(pose, ax):
     ax.plot(x, y, 'o', color='black', markersize=5)
 
 
-def estimate_gaussians(persons, group_data, idx, ellipse_param, back_param, N=200, show_group_space=True, diff_params = False):
+def estimate_gaussians(persons, group_data, idx, ellipse_param, back_param, group_params, N=200, show_group_space=True, diff_params = False):
     """ Plots surface and contour of 2D Gaussian function given ellipse parameters. Retrurns possible approaching poses"""
 
     group_radius = group_data['group_radius'][idx]
@@ -233,7 +233,7 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, back_param, N=20
         Z1 = None
         mu = np.array([group_pos[0], group_pos[1]])
 
-        Sigma = params_conversion(ospace_radius, ospace_radius, 0)
+        Sigma = params_conversion(group_params[0], group_params[1], 0)
 
         Z1 = A * multivariate_gaussian(pos, mu, Sigma)
         Z1 = multivariate_normal(mu, Sigma).pdf(pos)
