@@ -178,7 +178,7 @@ class Obstacles(SpaceModeling):
 
                 # dis is the distance from a person to a wall in a specific orientation
                 dis = euclidean_distance(gx, gy, dx, dy)  # dis in cm
-                group_params[0]
+                
                 if idx == 0 or idx ==2:
                     if dis - group_params[0] < ROBOT_DIM:  # Check if robot is able to naviagte
                         group_params[0] = dis - ROBOT_DIM
