@@ -242,7 +242,7 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
                             antialiased=False, cmap="jet")
 
     plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
+    plt.rc('font', family='Arial')
     ax1.set_xlabel(r'$x$ $[cm]$')
     ax1.set_ylabel(r'$y$ $[cm]$')
     ax1.set_zlabel(r'Cost')

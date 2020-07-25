@@ -204,7 +204,7 @@ class Bar:
         fig3, ax3 = plt.subplots(1, 2, tight_layout=True,sharey = True)
         ax3[0].set_ylabel(r'Perimeter Mean $(cm)$')
         ax3[0].set_xlabel(r'Number of Group Members')
-        ax3[0].set_title(r'Approaching Perimeter Comparison - Mean and Standar Deviation  - Fixed Parameters')
+        ax3[0].set_title(r'Approaching Perimeter Comparison - Mean and Standard Deviation  - Fixed Parameters')
         ax3[0].bar(x, average_fixed, yerr=std_fixed, align='center', alpha=0.5, ecolor='black', capsize=10)
         ax3[0].set_xticks(x)
         ax3[0].set_xticklabels(labels)
@@ -212,7 +212,7 @@ class Bar:
         
         ax3[1].set_ylabel(r'Perimeter Mean $(cm)$')
         ax3[1].set_xlabel(r'Number of Group Members')
-        ax3[1].set_title(r'Approaching Perimeter Comparison - Mean and Standar Deviation - Adaptive Parameters')
+        ax3[1].set_title(r'Approaching Perimeter Comparison - Mean and Standard Deviation - Adaptive Parameters')
         #ax3[1].errorbar(x, average_adapt, yerr=std_adapt,marker="o", linestyle="")
         ax3[1].bar(x, average_adapt, yerr=std_adapt, align='center', alpha=0.5, ecolor='black', capsize=10)
         ax3[1].set_xticks(x)
