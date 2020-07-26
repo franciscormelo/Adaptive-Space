@@ -18,6 +18,19 @@ from shapely import affinity
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_comparison import plot_gaussians
 
+import matplotlib 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
+
 
 SHOW_PLOT = True
 
@@ -482,8 +495,8 @@ class SpaceModeling:
                 draw_personalspace(
                     person[0], person[1], person[2], ax, PSPACEX, PSPACEY, plot_kwargs, idx)  # plot using ellipse.py functions
 
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='serif')
         plt.xlabel(r'$x$ $[cm]$')
         plt.ylabel(r'$y$ $[cm]$')
         ax.set_aspect(aspect=1)

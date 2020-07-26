@@ -17,6 +17,18 @@ from algorithm import SpaceModeling
 
 from gaussian_modeling import estimate_gaussians, plot_person, plot_group
 from bresenham import bresenham
+import matplotlib 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 # Relation between personal frontal space and back space
 BACK_FACTOR = 1.3

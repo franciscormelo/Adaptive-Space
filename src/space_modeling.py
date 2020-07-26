@@ -18,6 +18,18 @@ from shapely import affinity
 from approaching_pose import approachingfiltering_ellipses
 from gaussian_modeling import plot_gaussians
 
+import matplotlib 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 SHOW_PLOT = True
 
@@ -454,8 +466,8 @@ class SpaceModeling:
             # Plots personal space, group space, and possible approaching area
             plot_group(group_pose, group_radius, pspace_radius,
                        ospace_radius, ax, persons, sx, sy)
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='serif')
         plt.xlabel(r'$x$ $[cm]$')
         plt.ylabel(r'$y$ $[cm]$')
         ax.set_aspect(aspect=1)
@@ -516,8 +528,8 @@ def main():
                     plot_group(app.group_data['group_pose'][idx], app.group_data['group_radius'][idx], app.group_data['pspace_radius'][idx], app.group_data['ospace_radius'][idx], ax,
                                app.persons[idx],  app.pspace_param[idx][0],  app.pspace_param[idx][1])
 
-                    plt.rc('text', usetex=True)
-                    plt.rc('font', family='serif')
+                    # plt.rc('text', usetex=True)
+                    # plt.rc('font', family='serif')
                     plt.xlabel(r'$x$ $[cm]$')
                     plt.ylabel(r'$y$ $[cm]$')
                     ax.set_aspect(aspect=1)

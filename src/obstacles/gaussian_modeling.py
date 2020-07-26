@@ -19,6 +19,18 @@ from scipy.stats import multivariate_normal
 
 from approaching_pose import approaching_area_filtering, approaching_heuristic, zones_center
 
+import matplotlib 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 # CONSTANTS
 # Human Body Dimensions top view in cm
@@ -249,8 +261,8 @@ def estimate_gaussians(persons, group_data, idx, ellipse_param, back_param, grou
     surf = ax1.plot_surface(X, Y, Z, rstride=2, cstride=2, linewidth=1,
                             antialiased=False, cmap="jet")
 
-    plt.rc('text', usetex=True)
-    plt.rc('font', family='serif')
+    # plt.rc('text', usetex=True)
+    # plt.rc('font', family='serif')
     ax1.set_xlabel(r'$x$ $[cm]$')
     ax1.set_ylabel(r'$y$ $[cm]$')
     ax1.set_zlabel(r'Cost')
