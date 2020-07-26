@@ -41,7 +41,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "ideap/pspace_parameters_full_file.txt" , "5"
+                "synth/pspace_parameters.txt" , "3"
             ]
         },
         {
@@ -51,7 +51,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "args": [
-                "ideap/groups_perimeter_full.txt" 
+                "synth/groups_perimeter.txt" 
             ]
         },
         {

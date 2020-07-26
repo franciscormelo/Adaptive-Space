@@ -11,7 +11,19 @@
 import sys
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import matplotlib
 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 class Histogram:
     """Creates Histograms for personal space parameters."""
@@ -79,8 +91,8 @@ class Histogram:
         x = self.group_info['param_x']
         y = self.group_info['param_y']
 
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='serif')
         plt.style.use('seaborn-deep')
 
         n_bins = 20
@@ -88,9 +100,9 @@ class Histogram:
         fig, axs = plt.subplots(1, 2, sharey=False, tight_layout=True)
 
         self.histogram_1d(axs, 20, x, y)
-        axs[0].set_title(r'Persons Space Histogram $x,y$ axis - All Groups')
+        #axs[0].set_title(r'Persons Space Histogram $x,y$ axis - All Groups')
         self.histogram_2d(axs, 20, x, y)
-        axs[1].set_title(r'Personal Space 2D Histogram - All Groups')
+        #axs[1].set_title(r'Personal Space 2D Histogram - All Groups')
         print("Number of groups: " + str(len(x)))
 
         fig2, axs2 = plt.subplots(1, 2, sharey=False, tight_layout=True)
@@ -104,11 +116,11 @@ class Histogram:
                 g_y.append(self.group_info['param_y'][i])
 
         self.histogram_1d(axs2, 20, g_x, g_y)
-        axs2[0].set_title(
-            r'Persons Space Histogram $x,y$ axis - %d Members' % number_elements)
+        #axs2[0].set_title(
+        #    r'Personal Space Histogram $x,y$ axis - %d Members' % number_elements)
         self.histogram_2d(axs2, 20, g_x, g_y)
-        axs2[1].set_title(
-            r'Personal Space 2D Histogram - %d Members' % number_elements)
+        #axs2[1].set_title(
+        #   r'Personal Space 2D Histogram - %d Members' % number_elements)
 
         print("Number of groups: " + str(len(g_x)))
 

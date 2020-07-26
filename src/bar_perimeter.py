@@ -13,9 +13,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import statistics
 from statistics import mean, stdev
+import matplotlib
 
-# plt.rcParams["font.family"] = "Arial"
-# plt.rcParams.update({'font.size': 10})
+
+#legend_font = {'family' : 'Arial', 'weight' : 'normal', 'size': 10}
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
+
 
 class Bar:
     """Creates bar chart for perimeter"""
@@ -129,8 +142,8 @@ class Bar:
         gperim_adap, gperim_fixed, total_perim_fixed, total_perim_adaptive = self.sum_perimeter()
 
 
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='Arial')
         plt.style.use('seaborn-deep')
         
         # Sum perimeter bar plot for each group type
@@ -151,8 +164,8 @@ class Bar:
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
         ax[0].set_ylabel(r'Perimeter Sum $(cm)$')
-        ax[0].set_xlabel(r'Number of members')
-        ax[0].set_title(r'Approaching Perimeter Sum Comparison')
+        ax[0].set_xlabel(r'Number of Group Members')
+        #ax[0].set_title(r'Approaching Perimeter Sum Comparison')
         ax[0].set_xticks(x)
         ax[0].set_xticklabels(labels)
         ax[0].legend()
@@ -171,9 +184,9 @@ class Bar:
             x2 + width / 2, round(total_perim_fixed, 0), width, label='Fixed Parameters')
 
         
-        ax[1].set_ylabel(r'Sum Perimeter $(cm)$')
+        ax[1].set_ylabel(r'Perimeter Sum $(cm)$')
         ax[1].set_xlabel(r'Type of Parameters')
-        ax[1].set_title(r'Approaching Perimeter Sum Comparison')
+        #ax[1].set_title(r'Approaching Perimeter Sum Comparison')
         ax[1].set_xticks(x2)
         ax[1].set_xticklabels(labels_sum)
         ax[1].legend()
@@ -187,24 +200,24 @@ class Bar:
         average_fixed, average_adapt, std_fixed, std_adapt = self.average_perimeter(perim_fixed_groups,perim_adapt_groups)
    
    
-        fig2, ax2 = plt.subplots(1, 2, tight_layout=True,sharey = True)
+        fig2, ax2 = plt.subplots(1, 2, tight_layout=True,sharey = False)
         ax2[0].set_ylabel(r'Perimeter $(cm)$')
         ax2[0].set_xlabel(r'Number of Group Members')
-        ax2[0].set_title(r'Approaching Perimeter Comparison Box Plot - Fixed Parameters')
+        #ax2[0].set_title(r'Approaching Perimeter Comparison Box Plot - Fixed Parameters')
         ax2[0].boxplot(perim_fixed_groups)
         
         ax2[1].set_ylabel(r'Perimeter $(cm)$')
         ax2[1].set_xlabel(r'Number of Group Members')
-        ax2[1].set_title(r'Approaching Perimeter Comparison Box Plot - Adaptive Parameters')
+        #ax2[1].set_title(r'Approaching Perimeter Comparison Box Plot - Adaptive Parameters')
         ax2[1].boxplot(perim_adapt_groups)
 #####################################
 # Bar plot for mean and std
 
 
-        fig3, ax3 = plt.subplots(1, 2, tight_layout=True,sharey = True)
+        fig3, ax3 = plt.subplots(1, 2, tight_layout=True,sharey = False)
         ax3[0].set_ylabel(r'Perimeter Mean $(cm)$')
         ax3[0].set_xlabel(r'Number of Group Members')
-        ax3[0].set_title(r'Approaching Perimeter Comparison - Mean and Standard Deviation  - Fixed Parameters')
+        #ax3[0].set_title(r'Approaching Perimeter Comparison - Mean and Standard Deviation  - Fixed Parameters')
         ax3[0].bar(x, average_fixed, yerr=std_fixed, align='center', alpha=0.5, ecolor='black', capsize=10)
         ax3[0].set_xticks(x)
         ax3[0].set_xticklabels(labels)
@@ -212,7 +225,7 @@ class Bar:
         
         ax3[1].set_ylabel(r'Perimeter Mean $(cm)$')
         ax3[1].set_xlabel(r'Number of Group Members')
-        ax3[1].set_title(r'Approaching Perimeter Comparison - Mean and Standard Deviation - Adaptive Parameters')
+        #ax3[1].set_title(r'Approaching Perimeter Comparison - Mean and Standard Deviation - Adaptive Parameters')
         #ax3[1].errorbar(x, average_adapt, yerr=std_adapt,marker="o", linestyle="")
         ax3[1].bar(x, average_adapt, yerr=std_adapt, align='center', alpha=0.5, ecolor='black', capsize=10)
         ax3[1].set_xticks(x)

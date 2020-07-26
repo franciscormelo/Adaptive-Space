@@ -11,7 +11,18 @@
 import sys
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
 
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 class Bar:
     """Creates bar chart for perimeter"""
@@ -34,8 +45,8 @@ class Bar:
 
     def solve(self):
         """ """
-        plt.rc('text', usetex=True)
-        plt.rc('font', family='serif')
+        # plt.rc('text', usetex=True)
+        # plt.rc('font', family='serif')
         plt.style.use('seaborn-deep')
 
         fig, ax = plt.subplots(1, 1, tight_layout=True)
@@ -55,9 +66,9 @@ class Bar:
                            width, label='Fixed Parameters')
 
         # Add some text for labels, title and custom x-axis tick labels, etc.
-        ax.set_ylabel(r'Perimeter $(cm)$')
+        ax.set_ylabel(r'Perimeter Sum $(cm)$')
         ax.set_xlabel(r'Personal Space Initial Dimensions $(cm)$')
-        ax.set_title(r'Approaching Perimeter Comparison')
+        #ax.set_title(r'Approaching Perimeter Sum Comparison')
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
         ax.legend()
