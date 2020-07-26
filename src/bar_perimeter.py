@@ -152,6 +152,8 @@ class Bar:
         labels = []
         nb_labels = range(max(self.group_info['group_nb']))
         for i in nb_labels:
+            
+            
             labels.append(str((i + 1)))
 
         x = np.arange(len(labels))  # the label locations

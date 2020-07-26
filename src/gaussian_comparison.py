@@ -15,6 +15,18 @@ from ellipse import plot_ellipse
 from scipy.stats import multivariate_normal
 
 from approaching_pose import zones_center, approaching_heuristic, approaching_area_filtering
+import matplotlib 
+from matplotlib import rc
+font = {'size'   : 10}
+matplotlib.rc('font', **font)
+#rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+## for Palatino and other serif fonts use:
+#rc('font',**{'family':'serif','serif':['Palatino']})
+rc('text', usetex=True)
+
+# change font
+matplotlib.rcParams['font.sans-serif'] = "Arial"
+matplotlib.rcParams['font.family'] = "sans-serif"
 
 
 # CONSTANTS

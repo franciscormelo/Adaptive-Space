@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib 
 from matplotlib import rc
-font = {'size'   : 10}
+font = {'size'   : 20}
 matplotlib.rc('font', **font)
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
