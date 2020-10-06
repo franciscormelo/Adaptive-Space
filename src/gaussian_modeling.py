@@ -20,7 +20,7 @@ from scipy.stats import multivariate_normal
 from approaching_pose import approaching_area_filtering, approaching_heuristic, zones_center
 import matplotlib
 from matplotlib import rc
-font = {'size'   : 10}
+font = {'size'   : 20}
 matplotlib.rc('font', **font)
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -253,9 +253,9 @@ def plot_gaussians(persons, group_data, idx, ellipse_param, N=200, show_group_sp
 
     # plt.rc('text', usetex=True)
     # plt.rc('font', family='Arial')
-    ax1.set_xlabel(r'$x$ $[cm]$')
-    ax1.set_ylabel(r'$y$ $[cm]$')
-    ax1.set_zlabel(r'Cost')
+    ax1.set_xlabel(r'$x$ $[cm]$', labelpad = 10)
+    ax1.set_ylabel(r'$y$ $[cm]$', labelpad = 10)
+    ax1.set_zlabel(r'Cost', labelpad = 10)
 
     cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8, levels=10)
     # cs = ax2.contour(X, Y, Z, cmap="jet", linewidths=0.8)

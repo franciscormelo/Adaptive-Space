@@ -14,7 +14,7 @@ import matplotlib.ticker as ticker
 import matplotlib
 
 from matplotlib import rc
-font = {'size'   : 10}
+font = {'size'   : 22}
 matplotlib.rc('font', **font)
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -23,7 +23,7 @@ rc('text', usetex=True)
 
 # change font
 matplotlib.rcParams['font.sans-serif'] = "Arial"
-matplotlib.rcParams['font.family'] = "sans-serif"
+#matplotlib.rcParams['font.family'] = "sans-serif"
 
 class Histogram:
     """Creates Histograms for personal space parameters."""

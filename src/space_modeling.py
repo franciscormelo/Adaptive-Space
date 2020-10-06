@@ -20,7 +20,7 @@ from gaussian_modeling import plot_gaussians
 
 import matplotlib 
 from matplotlib import rc
-font = {'size'   : 10}
+font = {'size'   : 20}
 matplotlib.rc('font', **font)
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -29,7 +29,7 @@ rc('text', usetex=True)
 
 # change font
 matplotlib.rcParams['font.sans-serif'] = "Arial"
-matplotlib.rcParams['font.family'] = "sans-serif"
+#matplotlib.rcParams['font.family'] = "sans-serif"
 
 SHOW_PLOT = True
 

@@ -18,7 +18,7 @@ import matplotlib
 
 #legend_font = {'family' : 'Arial', 'weight' : 'normal', 'size': 10}
 from matplotlib import rc
-font = {'size'   : 10}
+font = {'size'   : 22}
 matplotlib.rc('font', **font)
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -27,7 +27,7 @@ rc('text', usetex=True)
 
 # change font
 matplotlib.rcParams['font.sans-serif'] = "Arial"
-matplotlib.rcParams['font.family'] = "sans-serif"
+#matplotlib.rcParams['font.family'] = "sans-serif"
 
 
 class Bar:
@@ -181,9 +181,9 @@ class Bar:
         x2 = np.arange(len(labels_sum))  # the label locations
 
         rects1_sum = ax[1].bar(
-            x2 - width / 2, round(total_perim_adaptive, 0), width, label='Adaptive Parameters')
+            x2 - width / 2, int(total_perim_adaptive), width, label='Adaptive Parameters')
         rects2_sum = ax[1].bar(
-            x2 + width / 2, round(total_perim_fixed, 0), width, label='Fixed Parameters')
+            x2 + width / 2, int(total_perim_fixed), width, label='Fixed Parameters')
 
         
         ax[1].set_ylabel(r'Perimeter Sum $(cm)$')

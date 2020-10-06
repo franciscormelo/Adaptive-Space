@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib 
 from matplotlib import rc
-font = {'size'   : 20}
+font = {'size'   : 22}
 matplotlib.rc('font', **font)
 #rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -22,7 +22,7 @@ rc('text', usetex=True)
 
 # change font
 matplotlib.rcParams['font.sans-serif'] = "Arial"
-matplotlib.rcParams['font.family'] = "sans-serif"
+#matplotlib.rcParams['font.family'] = "sans-serif"
 
 class Bar:
     """Creates bar chart for perimeter"""
@@ -71,7 +71,7 @@ class Bar:
         #ax.set_title(r'Approaching Perimeter Sum Comparison')
         ax.set_xticks(x)
         ax.set_xticklabels(labels)
-        ax.legend()
+        ax.legend(loc="best")
         ax.grid(axis='y', alpha=0.75)
 
         self.autolabel(rects1, ax)
