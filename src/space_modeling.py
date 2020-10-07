@@ -88,7 +88,7 @@ def draw_personalspace(x, y, angle, ax, sx, sy, plot_kwargs, idx):
     draw_arrow(x, y, angle, ax)  # orientation arrow angle in radians
     ax.plot(x, y, 'bo', markersize=8)
     draw_person_top(x, y, angle, ax)
-    ax.text(x + 3, y + 3, "$P_" + str(idx) + "$", fontsize=12)
+    ax.text(x + 10, y + 10, "$P_" + str(idx) + "$", fontsize=12)
 
     plot_ellipse(semimaj=sx, semimin=sy, phi=angle, x_cent=x, y_cent=y, ax=ax,
                  plot_kwargs=plot_kwargs)
