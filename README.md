@@ -15,4 +15,4 @@ Example
 $ python3 space_modeling.py groups_info.txt
 ```
 
-![alt text](approaching_pose.pdf)
+![alt text](approaching_pose.png)
