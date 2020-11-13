@@ -1,4 +1,4 @@
-# Socially Reactive Navigation Models for Mobile Robots
+# Adaptive Space 
 <a href="https://www.codefactor.io/repository/github/franciscormelo/socially-reactive-navigation-models/overview/master"><img src="https://www.codefactor.io/repository/github/franciscormelo/socially-reactive-navigation-models/badge/master?s=0f0ee85f8d2be20bfdbb8f4d0f4570c86de5f61a" alt="CodeFactor" /></a>
 ## Requirements
 Install requirements:
