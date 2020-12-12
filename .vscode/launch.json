@@ -1,0 +1,65 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: obstacles.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "obstacle_group.txt"
+            ]
+        },
+        {
+            "name": "Python: space_modeling.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "groups_info/groups_info.txt"
+            ]
+        },
+        {
+            "name": "Python: parameters_comparison.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "groups_info/groups_info.txt"
+            ]
+        },
+        {
+            "name": "Python: histogram_parameters.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "ideap/pspace_parameters_full.txt" , "3"
+            ]
+        },
+        {
+            "name": "Python: bar_perimeter.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": [
+                "ideap/groups_perimeter_full.txt" 
+            ]
+        },
+        {
+            "name": "Python: bar_perimeter_diff_iconditions.py",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+        },
+    ]
+}

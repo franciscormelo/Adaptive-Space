@@ -471,7 +471,7 @@ class SpaceModeling:
         plt.xlabel(r'$x$ $[cm]$')
         plt.ylabel(r'$y$ $[cm]$')
         ax.set_aspect(aspect=1)
-        plt.savefig('figures/space_modeling.eps', format='eps')
+        #plt.savefig('figures/space_modeling.eps', format='eps')
         if SHOW_PLOT:
             plt.tight_layout()
             plt.show(block=False)

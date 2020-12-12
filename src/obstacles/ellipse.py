@@ -75,7 +75,7 @@ def plot_ellipse(semimaj=1, semimin=1, phi=0, x_cent=0, y_cent=0, theta_num=1e3,
             phi *= -1
 
     # Generate data for ellipse structure
-    theta = np.linspace(0, 2 * np.pi, theta_num)
+    theta = np.linspace(0, 2 * np.pi, int(theta_num))
     r = 1 / np.sqrt((np.cos(theta)) ** 2 + (np.sin(theta)) ** 2)
     x = r * np.cos(theta)
     y = r * np.sin(theta)
