@@ -3,6 +3,10 @@ src/figures/
 src/old_files/
 src/to_do/
 src/ros/
-src/obstacles/figs
-
+src/obstacles/figs/
+.idea/
+.vscode/
+src/.idea/
+src/.vscode/
+.DS_store
 *.pyc
