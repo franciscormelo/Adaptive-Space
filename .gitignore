@@ -2,7 +2,7 @@ figures/
 src/figures/
 src/old_files/
 src/to_do/
-src/ros
+src/ros/
 src/obstacles/figs
 
 *.pyc
