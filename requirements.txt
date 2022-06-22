@@ -31,7 +31,7 @@ matplotlib == 3.1.1
 # src/old_files/old_version_space_modeling.py: 10
 # src/space_modeling_full.py: 10
 # src/to_do/curve_fitting.py: 10
-numpy == 1.17.2
+numpy == 1.22.0
 
 # src/to_do/GCFF_run_matlab.py: 1
 oct2py == 5.0.4
