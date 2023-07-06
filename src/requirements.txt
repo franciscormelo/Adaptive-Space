@@ -65,4 +65,4 @@ oct2py == 5.0.4
 # src/ros/ellipse.py: 4
 # src/ros/gaussian_modeling.py: 18
 # src/to_do/curve_fitting.py: 23
-scipy == 1.4.1
+scipy == 1.10.0
